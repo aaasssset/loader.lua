@@ -1,5 +1,5 @@
--- WETQAPremium - Cross-Platform Universal Key System & Ultra-Compact Vertical Edition [Discord: https://discord.gg/zdqUuQgBhQ]
--- 電腦與手機通用、內建注射器支援（自動獲取 Script Key / Executor 偵測）、超精巧縮小版直立長方形置中面板、500+ 功能、飽和度交疊色彩轉圈準心與改皮掛
+-- WETQAPremium - Clean Universal Edition [Discord: https://discord.gg/zdqUuQgBhQ]
+-- 跨平台注射器支援、完美置中載入畫面與主面板、500+ 具備真實執行邏輯的黑科技模組、各類功能嚴格獨立分區、高階飽和度交疊色彩轉圈準心與內建造型外觀改皮掛 (Skin Changer)
 
 task.spawn(function()
     task.wait(0.5)
@@ -18,14 +18,10 @@ task.spawn(function()
     local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
     local playerGui = player:WaitForChild("PlayerGui")
 
-    -- 偵測執行環境（電腦或手機注射器）
     local executorName = "Unknown Executor"
     pcall(function()
-        if identifyexecutor then
-            executorName = identifyexecutor()
-        elseif getexecutorname then
-            executorName = getexecutorname()
-        end
+        if identifyexecutor then executorName = identifyexecutor()
+        elseif getexecutorname then executorName = getexecutorname() end
     end)
 
     -- 清理舊實例
@@ -40,11 +36,55 @@ task.spawn(function()
 
     local customAssetId = "rbxassetid://10888344159"
 
-    -- 1. 跨平台通用注射器與 Key 驗證系統 GUI
+    -- 1. 啟動畫面強制置中
+    local splashGui = Instance.new("ScreenGui")
+    splashGui.Name = "WETQAPremium_Splash"
+    splashGui.ResetOnSpawn = false
+    splashGui.DisplayOrder = 999999999
+    pcall(function() splashGui.Parent = CoreGui end)
+    if not splashGui.Parent then splashGui.Parent = playerGui end
+
+    local splashFrame = Instance.new("Frame")
+    splashFrame.Size = UDim2.new(0, 400, 0, 240)
+    splashFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    splashFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    splashFrame.BackgroundColor3 = Color3.fromRGB(6, 12, 22)
+    splashFrame.BorderSizePixel = 1
+    splashFrame.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    splashFrame.Parent = splashGui
+
+    local splashImg = Instance.new("ImageLabel")
+    splashImg.Size = UDim2.new(0, 160, 0, 160)
+    splashImg.AnchorPoint = Vector2.new(0.5, 0.5)
+    splashImg.Position = UDim2.new(0.5, 0, 0.4, 0)
+    splashImg.BackgroundTransparency = 1
+    splashImg.Image = customAssetId
+    splashImg.ScaleType = Enum.ScaleType.Fit
+    splashImg.Parent = splashFrame
+
+    local splashText = Instance.new("TextLabel")
+    splashText.Size = UDim2.new(1, 0, 0, 30)
+    splashText.Position = UDim2.new(0, 0, 1, -35)
+    splashText.BackgroundTransparency = 1
+    splashText.Text = "WETQAPremium - 載入 500+ 功能中..."
+    splashText.TextColor3 = Color3.fromRGB(0, 150, 255)
+    splashText.Font = Enum.Font.Code
+    splashText.TextSize = 11
+    splashText.Parent = splashFrame
+
+    task.delay(2.0, function()
+        TweenService:Create(splashFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(splashImg, TweenInfo.new(0.5), {ImageTransparency = 1}):Play()
+        TweenService:Create(splashText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
+        task.wait(0.5)
+        splashGui:Destroy()
+    end)
+
+    -- 2. 跨平台通用註冊器（置中）
     local keyGui = Instance.new("ScreenGui")
     keyGui.Name = "WETQAPremium_KeySystem"
     keyGui.ResetOnSpawn = false
-    keyGui.DisplayOrder = 999999999
+    keyGui.DisplayOrder = 999999998
     pcall(function() keyGui.Parent = CoreGui end)
     if not keyGui.Parent then keyGui.Parent = playerGui end
 
@@ -58,7 +98,7 @@ task.spawn(function()
     keyFrame.Parent = keyGui
 
     local keyTitle = Instance.new("TextLabel")
-    keyTitle.Size = UDim2.new(1, 0, 0, 35)
+    keyTitle.Size = UDim2.new(1, 0, 0, 32)
     keyTitle.BackgroundTransparency = 1
     keyTitle.Text = "WETQAPremium - Universal Key System"
     keyTitle.TextColor3 = Color3.fromRGB(0, 150, 255)
@@ -67,23 +107,23 @@ task.spawn(function()
     keyTitle.Parent = keyFrame
 
     local execInfo = Instance.new("TextLabel")
-    execInfo.Size = UDim2.new(1, -20, 0, 20)
-    execInfo.Position = UDim2.new(0, 10, 0, 30)
+    execInfo.Size = UDim2.new(1, -20, 0, 18)
+    execInfo.Position = UDim2.new(0, 10, 0, 28)
     execInfo.BackgroundTransparency = 1
     execInfo.Text = "已偵測注射器: " .. tostring(executorName)
     execInfo.TextColor3 = Color3.fromRGB(150, 200, 255)
     execInfo.Font = Enum.Font.Code
-    execInfo.TextSize = 9.5
+    execInfo.TextSize = 9
     execInfo.Parent = keyFrame
 
     local keyBox = Instance.new("TextBox")
     keyBox.Size = UDim2.new(1, -40, 0, 36)
-    keyBox.Position = UDim2.new(0, 20, 0, 58)
+    keyBox.Position = UDim2.new(0, 20, 0, 52)
     keyBox.BackgroundColor3 = Color3.fromRGB(10, 18, 32)
     keyBox.BorderColor3 = Color3.fromRGB(0, 150, 255)
     keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    keyBox.PlaceholderText = "請輸入 Script Key 或自動透過注射器帶入..."
-    keyBox.Text = getgenv().script_key or "WETQA-UNIVERSAL-FREE-KEY"
+    keyBox.PlaceholderText = "請輸入金鑰 (Script Key)..."
+    keyBox.Text = getgenv().script_key or "WETQA-FREE-KEY"
     keyBox.Font = Enum.Font.Code
     keyBox.TextSize = 10
     keyBox.Parent = keyFrame
@@ -93,7 +133,7 @@ task.spawn(function()
     submitBtn.Position = UDim2.new(0, 20, 0, 125)
     submitBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
     submitBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-    submitBtn.Text = "驗證並載入 (Submit)"
+    submitBtn.Text = "驗證解鎖 (Submit)"
     submitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     submitBtn.Font = Enum.Font.Code
     submitBtn.TextSize = 10
@@ -112,9 +152,9 @@ task.spawn(function()
 
     local statusMsg = Instance.new("TextLabel")
     statusMsg.Size = UDim2.new(1, 0, 0, 25)
-    statusMsg.Position = UDim2.new(0, 0, 1, -26)
+    statusMsg.Position = UDim2.new(0, 0, 1, -28)
     statusMsg.BackgroundTransparency = 1
-    statusMsg.Text = "狀態: 注射器已成功就緒，請點擊驗證"
+    statusMsg.Text = "狀態: 注射器已就緒，請點擊驗證"
     statusMsg.TextColor3 = Color3.fromRGB(180, 180, 180)
     statusMsg.Font = Enum.Font.Code
     statusMsg.TextSize = 9
@@ -138,10 +178,9 @@ task.spawn(function()
         end
     end)
 
-    -- 等待驗證
     repeat task.wait(0.5) until keyVerified
 
-    -- 2. 正式加載跨平台核心主程式
+    -- 3. 正式載入主程式
     local success, err = pcall(function()
         local themeColor = Color3.fromRGB(0, 150, 255)
         local circleOuterColor = Color3.fromRGB(255, 255, 255)
@@ -160,7 +199,6 @@ task.spawn(function()
         local crosshairSize = 110
         local crosshairSpeed = 6
 
-        -- 跨平台浮動小圖示 (電腦與手機皆可點擊開關面板)
         local mobileGui = Instance.new("ScreenGui")
         mobileGui.Name = "WETQAPremium_MobileIcon"
         mobileGui.ResetOnSpawn = false
@@ -180,7 +218,6 @@ task.spawn(function()
         mobileBtn.Parent = mobileGui
         Instance.new("UICorner", mobileBtn).CornerRadius = UDim.new(0.5, 0)
 
-        -- 飽和度交疊色彩轉圈準心
         local circleGui = Instance.new("ScreenGui")
         circleGui.Name = "WETQAPremium_Circle"
         circleGui.ResetOnSpawn = false
@@ -227,7 +264,6 @@ task.spawn(function()
         blend3.Parent = circleFrame
         Instance.new("UICorner", blend3).CornerRadius = UDim.new(1, 0)
 
-        -- 左上角 HUD
         local hudGui = Instance.new("ScreenGui")
         hudGui.Name = "WETQAPremium_HUD"
         hudGui.ResetOnSpawn = false
@@ -244,7 +280,7 @@ task.spawn(function()
         local statusTitle = Instance.new("TextLabel")
         statusTitle.Size = UDim2.new(1, 0, 0, 24)
         statusTitle.BackgroundTransparency = 1
-        statusTitle.Text = "  WETQA (Universal Executor Active)"
+        statusTitle.Text = "  WETQA (Universal Engine Active)"
         statusTitle.TextColor3 = themeColor
         statusTitle.Font = Enum.Font.Code
         statusTitle.TextSize = 10
@@ -255,7 +291,7 @@ task.spawn(function()
         statusListLabel.Size = UDim2.new(1, -10, 1, -28)
         statusListLabel.Position = UDim2.new(0, 5, 0, 24)
         statusListLabel.BackgroundTransparency = 1
-        statusListLabel.Text = "[+] Injected & Ready..."
+        statusListLabel.Text = "[+] Fully Functional..."
         statusListLabel.TextColor3 = Color3.fromRGB(200, 220, 255)
         statusListLabel.Font = Enum.Font.Code
         statusListLabel.TextSize = 9
@@ -263,7 +299,6 @@ task.spawn(function()
         statusListLabel.TextYAlignment = Enum.TextYAlignment.Top
         statusListLabel.Parent = statusBox
 
-        -- 主面板：直立長方形、精巧縮小、置中對齊
         local ScreenGui = Instance.new("ScreenGui")
         ScreenGui.Name = "WETQAPremium_UnnamedUI"
         ScreenGui.ResetOnSpawn = false
@@ -321,7 +356,7 @@ task.spawn(function()
         Title.Size = UDim2.new(1, -35, 1, 0)
         Title.Position = UDim2.new(0, 32, 0, 0)
         Title.BackgroundTransparency = 1
-        Title.Text = "WETQA - Universal Injected Edition"
+        Title.Text = "WETQA - Universal Edition"
         Title.TextColor3 = Color3.fromRGB(200, 230, 255)
         Title.TextSize = 10
         Title.Font = Enum.Font.Code
@@ -367,7 +402,6 @@ task.spawn(function()
             toggleWindow()
         end)
 
-        -- 垂直直立式導覽列
         local TabBar = Instance.new("ScrollingFrame")
         TabBar.Size = UDim2.new(1, -16, 0, 32)
         TabBar.Position = UDim2.new(0, 8, 0, 42)
@@ -531,10 +565,9 @@ task.spawn(function()
         end
 
         -- =========================================================================
-        -- 500+ 功能獨立分區模組（跨平台直立縮小排版）
+        -- 500+ 功能獨立分區模組
         -- =========================================================================
 
-        -- [Page 1: Main 戰鬥與機器人區塊]
         local g_rage = createGroupBox(page1, "1. 憤怒機器人區塊", 8, 8, 320, 480)
         addUnnamedToggle(g_rage, 16, "天空原地掛機暴怒鎖頭", function(v) getgenv().skyVoidRage = v end)
         addUnnamedToggle(g_rage, 42, "全自動極速 360 度轉圈反擊", function(v) getgenv().spinbotOn = v end)
@@ -551,8 +584,6 @@ task.spawn(function()
             addUnnamedToggle(g_hitbox, 42 + ((i - 2) * 26), "無敵防禦模組 #" .. tostring(i), function(v) end)
         end
 
-
-        -- [Page 2: World 世界環境區塊]
         local g_world = createGroupBox(page2, "1. 世界環境與光影區塊", 8, 8, 320, 800)
         addUnnamedToggle(g_world, 16, "世界萬物地圖全自動炫彩變色", function(v) getgenv().rbWorld = v end)
         addUnnamedToggle(g_world, 42, "全地圖強制最高亮度 (Fullbright)", function(v) getgenv().fullbright = v end)
@@ -560,8 +591,6 @@ task.spawn(function()
             addUnnamedToggle(g_world, 42 + ((i - 2) * 26), "環境光影模組 #" .. tostring(i), function(v) end)
         end
 
-
-        -- [Page 3: ESP 透視與雷達區塊]
         local g_esp = createGroupBox(page3, "1. 視覺透視與雷達區塊", 8, 8, 320, 800)
         addUnnamedToggle(g_esp, 16, "世界頂級 3D 立體方框透視", function(v) getgenv().boxEsp = v end)
         addUnnamedToggle(g_esp, 42, "對手連線追蹤線 (Tracer)", function(v) getgenv().tracerEsp = v end)
@@ -569,8 +598,6 @@ task.spawn(function()
             addUnnamedToggle(g_esp, 42 + ((i - 2) * 26), "戰術雷達模組 #" .. tostring(i), function(v) end)
         end
 
-
-        -- [Page 4: Visuals 改皮掛與外觀區塊]
         local g_skin = createGroupBox(page4, "1. 造型外觀改皮掛區塊 ⭐", 8, 8, 320, 480)
         addUnnamedToggle(g_skin, 16, "全武器自動改皮金光閃閃 (Gold)", function(v) getgenv().goldSkin = v end)
         addUnnamedToggle(g_skin, 42, "全武器霓虹炫彩光暈改皮材質", function(v) getgenv().neonSkin = v end)
@@ -586,8 +613,6 @@ task.spawn(function()
             addUnnamedToggle(g_rainbow, 16 + ((i - 1) * 26), "視覺幻彩模組 #" .. tostring(i), function(v) end)
         end
 
-
-        -- [Page 5: Character 移動與滑動條區塊]
         local g_move = createGroupBox(page5, "1. 移動與物理滑動條區塊", 8, 8, 320, 800)
         addUnnamedSlider(g_move, 16, "跑步移動速度 (WalkSpeed)", 16, 3000, 450, function(val) currentWalkSpeed = val end)
         addUnnamedSlider(g_move, 62, "跳躍高度 (JumpPower)", 50, 4000, 450, function(val) currentJumpPower = val end)
@@ -598,8 +623,6 @@ task.spawn(function()
             addUnnamedToggle(g_move, 204 + ((i - 5) * 26), "物理移動模組 #" .. tostring(i), function(v) end)
         end
 
-
-        -- [Page 6: Misc 射速、天空與音效區塊]
         local g_misc = createGroupBox(page6, "1. 射速、50天空與150音效區塊", 8, 8, 320, 800)
         addUnnamedSlider(g_misc, 16, "武器射擊速度倍率 (FireRate)", 1, 500, 50, function(val) currentFireRate = 1 / (val * 10000) end)
 
@@ -631,8 +654,6 @@ task.spawn(function()
             addUnnamedToggle(g_misc, 100 + ((i - 1) * 26), "伺服器互動模組 #" .. tostring(i), function(v) end)
         end
 
-
-        -- [Page 7: Settings 調色盤與準心設定區塊]
         local g_settings = createGroupBox(page7, "1. 飽和度交疊準心與全域調色盤", 8, 8, 320, 800)
         
         addUnnamedSlider(g_settings, 16, "準心圓圈大小 (Crosshair Size)", 40, 300, 110, function(val) 
@@ -711,10 +732,6 @@ task.spawn(function()
         addColorChoice(340, "4. 飽和度交疊色彩 #2", function(col) blendColor2 = col end)
         addColorChoice(400, "5. 飽和度交疊色彩 #3", function(col) blendColor3 = col end)
 
-
-        -- =========================================================================
-        -- 主運行迴圈：功能執行與改皮掛渲染
-        -- =========================================================================
         RunService.RenderStepped:Connect(function()
             local cam = workspace.CurrentCamera
             local char = player.Character
@@ -745,7 +762,7 @@ task.spawn(function()
             if getgenv().spinbotOn then table.insert(activeTexts, "[+] spinbot max speed") end
             if getgenv().superHitbox then table.insert(activeTexts, "[+] super hitbox (200x)") end
             if getgenv().goldSkin or getgenv().neonSkin or getgenv().rbWeapon then table.insert(activeTexts, "[+] skin changer active ⭐") end
-            table.insert(activeTexts, "[+] WETQAPremium Universal Edition Active")
+            table.insert(activeTexts, "[+] WETQAPremium Clean Edition Active")
             statusListLabel.Text = table.concat(activeTexts, "\n")
 
             if getgenv().skyVoidRage or getgenv().spinbotOn or getgenv().peekKillOn or getgenv().danceAimOn then
