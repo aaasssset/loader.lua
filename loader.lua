@@ -1,18 +1,18 @@
--- WETQA & Unnamed Enhancements - 自動驗證與 Unnamed 完美復刻面板
+-- WETQA & Unnamed Enhancements - 絕對相容版
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 local player = Players.LocalPlayer
 
--- 自動檢查是否有帶入 script_key（如果沒有則給予預設身分）
-local currentKey = script_key or "NO_KEY_PROVIDED"
+-- 安全防呆機制：確保 script_key 存在，避免直接報錯
+local keyToUse = (typeof(script_key) == "string" and script_key ~= "") and script_key :gsub('"', '') or "UNAUTHORIZED"
 
 -- 防止重複載入
 local oldGui = player.PlayerGui:FindFirstChild("WETQA_Enhancements_Menu")
 if oldGui then oldGui:Destroy() end
 
--- 建立主畫面 (完全復刻 Unnamed 風格)
+-- 建立主畫面
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "WETQA_Enhancements_Menu"
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
@@ -76,7 +76,6 @@ local tabs = {"main", "world", "esp", "visuals", "character", "misc", "settings"
 local tabButtons = {}
 local contentFrames = {}
 
--- 內容呈現容器
 local Container = Instance.new("Frame")
 Container.Size = UDim2.new(1, -24, 1, -85)
 Container.Position = UDim2.new(0, 12, 0, 75)
@@ -117,15 +116,10 @@ for i, name in ipairs(tabs) do
     table.insert(tabButtons, btn)
 end
 
--- 預設開啟 main 分頁
 contentFrames["main"].Visible = true
 tabButtons[1].TextColor3 = Color3.fromRGB(0, 255, 120)
 
--- ==========================================
--- 各分頁內容與功能建構
--- ==========================================
-
--- 1. MAIN 分頁 (自動顯示授權通過狀態 & Aimbot)
+-- 1. MAIN 分頁
 do
     local f = contentFrames["main"]
     local y = 15
@@ -149,7 +143,7 @@ do
     statusLbl.Size = UDim2.new(1, -20, 0, 35)
     statusLbl.Position = UDim2.new(0, 10, 0, y)
     statusLbl.BackgroundTransparency = 1
-    statusLbl.Text = "✅ [Auto-Verified] 授權金鑰已自動通過生效！"
+    statusLbl.Text = "✅ [Key Loaded]: " .. keyToUse
     statusLbl.TextColor3 = Color3.fromRGB(0, 255, 120)
     statusLbl.Font = Enum.Font.Code
     statusLbl.TextSize = 12
@@ -158,7 +152,6 @@ do
     y = y + 45
 
     addHeader("silent aim & aimbot")
-    
     local aimOn = false
     local aimBtn = Instance.new("TextButton")
     aimBtn.Size = UDim2.new(1, -20, 0, 35)
@@ -209,7 +202,6 @@ do
         y = y + 30
     end
     addHeader("skybox & atmosphere")
-    
     local skies = {
         {"🌌 Aurora Night", "rbxassetid://644551720"},
         {"🌠 Galaxy Nebula", "rbxassetid://155091771"},
@@ -259,7 +251,6 @@ do
         y = y + 30
     end
     addHeader("esp options & override appearance")
-    
     local espOn = false
     local b = Instance.new("TextButton")
     b.Size = UDim2.new(1, -20, 0, 35)
@@ -312,7 +303,6 @@ do
         y = y + 30
     end
     addHeader("crosshair & viewmodel")
-    
     local crossGui = player:PlayerGui:FindFirstChild("WETQA_Crosshair")
     if not crossGui then
         crossGui = Instance.new("ScreenGui")
@@ -327,7 +317,6 @@ do
         dot.Parent = crossGui
         local dc = Instance.new("UICorner") dc.CornerRadius = UDim.new(1, 0) dc.Parent = dot
     end
-    
     local crossOn = false
     local b = Instance.new("TextButton")
     b.Size = UDim2.new(1, -20, 0, 35)
@@ -367,7 +356,6 @@ do
         y = y + 30
     end
     addHeader("movement & character options")
-    
     local speedOn = false
     local b = Instance.new("TextButton")
     b.Size = UDim2.new(1, -20, 0, 35)
@@ -390,7 +378,7 @@ do
     end)
 end
 
--- 6. MISC 分頁 (內含風怒機器人虛空秒殺)
+-- 6. MISC 分頁 (風怒機器人虛空秒殺)
 do
     local f = contentFrames["misc"]
     local y = 15
@@ -408,7 +396,6 @@ do
         y = y + 30
     end
     addHeader("auto queue & custom windbot void-attack")
-    
     local windBotOn = false
     local b = Instance.new("TextButton")
     b.Size = UDim2.new(1, -20, 0, 35)
@@ -428,7 +415,6 @@ do
         b.BackgroundColor3 = windBotOn and Color3.fromRGB(150, 40, 40) or Color3.fromRGB(20, 20, 30)
     end)
     
-    -- 風怒機器人虛空秒殺循環
     RunService.Heartbeat:Connect(function()
         if windBotOn then
             pcall(function()
@@ -465,7 +451,6 @@ do
         y = y + 30
     end
     addHeader("configuration & menu options")
-    
     local closeB = Instance.new("TextButton")
     closeB.Size = UDim2.new(1, -20, 0, 35)
     closeB.Position = UDim2.new(0, 10, 0, y)
