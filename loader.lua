@@ -1,5 +1,5 @@
--- WETQAPremium - Ultimate 500+ God-Tier Unbound Cursor & Color Picker Edition [Discord: https://discord.gg/zdqUuQgBhQ]
--- 內建動畫彈出特效、三角游標自由移動、指定照片背景、分類頁面、三色循環轉圈準心與全域調色盤
+-- WETQAPremium - Cosmic Ultimate 500+ Vertical God-Tier Edition [Discord: https://discord.gg/zdqUuQgBhQ]
+-- 宇宙至尊最高階垂直直立式面板（長方形直向排列）、動態彈出特效、獨立三角游標、直向分類、全域調色盤與填滿三色轉圈準心
 
 task.spawn(function()
     task.wait(0.5)
@@ -40,10 +40,9 @@ task.spawn(function()
         local oldMobile = playerGui:FindFirstChild("WETQAPremium_MobileIcon")
         if oldMobile then oldMobile:Destroy() end
 
-        -- 使用者指定的標誌與背景照片 (rbxassetid://10888344159)
         local customAssetId = "rbxassetid://10888344159"
 
-        -- 全域可調顏色變數（主題顏色、轉圈三色、外框色）
+        -- 全域可調顏色與數值變數
         local themeColor = Color3.fromRGB(0, 150, 255)
         local c1 = Color3.fromRGB(255, 0, 0)
         local c2 = Color3.fromRGB(0, 255, 0)
@@ -55,9 +54,11 @@ task.spawn(function()
         local currentFireRate = 0.00000001
         local currentFlySpeed = 200
         local thirdPersonDist = 15
-        local circleSize = 160
 
-        -- 1. 開啟載入畫面 (Splash Screen)
+        local crosshairSize = 120
+        local crosshairSpeed = 5
+
+        -- 1. 宇宙最高階啟動畫面
         local splashGui = Instance.new("ScreenGui")
         splashGui.Name = "WETQAPremium_Splash"
         splashGui.ResetOnSpawn = false
@@ -85,7 +86,7 @@ task.spawn(function()
         splashText.Size = UDim2.new(1, 0, 0, 40)
         splashText.Position = UDim2.new(0, 0, 1, -40)
         splashText.BackgroundTransparency = 1
-        splashText.Text = "WETQAPremium - Unbound Cursor & Color Picker..."
+        splashText.Text = "WETQAPremium - Cosmic Vertical God-Tier..."
         splashText.TextColor3 = themeColor
         splashText.Font = Enum.Font.Code
         splashText.TextSize = 12
@@ -99,7 +100,7 @@ task.spawn(function()
             splashGui:Destroy()
         end)
 
-        -- 2. 手機/浮動小圖示 (帶指定照片)
+        -- 2. 懸浮手機/電腦小圖示
         local mobileGui = Instance.new("ScreenGui")
         mobileGui.Name = "WETQAPremium_MobileIcon"
         mobileGui.ResetOnSpawn = false
@@ -119,14 +120,15 @@ task.spawn(function()
         mobileBtn.Parent = mobileGui
         Instance.new("UICorner", mobileBtn).CornerRadius = UDim.new(0.5, 0)
 
-        -- 3. 中間動態三色轉圈準心圈
+        -- 3. 填滿三色動態轉圈準心圈
         local circleGui = Instance.new("ScreenGui")
         circleGui.Name = "WETQAPremium_Circle"
         circleGui.ResetOnSpawn = false
         circleGui.Parent = playerGui
 
         local circleFrame = Instance.new("Frame")
-        circleFrame.Size = UDim2.new(0, circleSize, 0, circleSize)
+        circleFrame.Name = "CrosshairFrame"
+        circleFrame.Size = UDim2.new(0, crosshairSize, 0, crosshairSize)
         circleFrame.AnchorPoint = Vector2.new(0.5, 0.5)
         circleFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
         circleFrame.BackgroundTransparency = 1
@@ -138,29 +140,29 @@ task.spawn(function()
         cStroke.Parent = circleFrame
         Instance.new("UICorner", circleFrame).CornerRadius = UDim.new(1, 0)
 
-        local dot1 = Instance.new("Frame")
-        dot1.Size = UDim2.new(0, 8, 0, 8)
-        dot1.AnchorPoint = Vector2.new(0.5, 0.5)
-        dot1.BackgroundColor3 = c1
-        dot1.BorderSizePixel = 0
-        dot1.Parent = circleFrame
-        Instance.new("UICorner", dot1).CornerRadius = UDim.new(1, 0)
+        local fill1 = Instance.new("Frame")
+        fill1.Size = UDim2.new(0, 22, 0, 22)
+        fill1.AnchorPoint = Vector2.new(0.5, 0.5)
+        fill1.BackgroundColor3 = c1
+        fill1.BorderSizePixel = 0
+        fill1.Parent = circleFrame
+        Instance.new("UICorner", fill1).CornerRadius = UDim.new(1, 0)
 
-        local dot2 = Instance.new("Frame")
-        dot2.Size = UDim2.new(0, 8, 0, 8)
-        dot2.AnchorPoint = Vector2.new(0.5, 0.5)
-        dot2.BackgroundColor3 = c2
-        dot2.BorderSizePixel = 0
-        dot2.Parent = circleFrame
-        Instance.new("UICorner", dot2).CornerRadius = UDim.new(1, 0)
+        local fill2 = Instance.new("Frame")
+        fill2.Size = UDim2.new(0, 22, 0, 22)
+        fill2.AnchorPoint = Vector2.new(0.5, 0.5)
+        fill2.BackgroundColor3 = c2
+        fill2.BorderSizePixel = 0
+        fill2.Parent = circleFrame
+        Instance.new("UICorner", fill2).CornerRadius = UDim.new(1, 0)
 
-        local dot3 = Instance.new("Frame")
-        dot3.Size = UDim2.new(0, 8, 0, 8)
-        dot3.AnchorPoint = Vector2.new(0.5, 0.5)
-        dot3.BackgroundColor3 = c3
-        dot3.BorderSizePixel = 0
-        dot3.Parent = circleFrame
-        Instance.new("UICorner", dot3).CornerRadius = UDim.new(1, 0)
+        local fill3 = Instance.new("Frame")
+        fill3.Size = UDim2.new(0, 22, 0, 22)
+        fill3.AnchorPoint = Vector2.new(0.5, 0.5)
+        fill3.BackgroundColor3 = c3
+        fill3.BorderSizePixel = 0
+        fill3.Parent = circleFrame
+        Instance.new("UICorner", fill3).CornerRadius = UDim.new(1, 0)
 
         -- 4. 左上角即時 HUD
         local hudGui = Instance.new("ScreenGui")
@@ -179,7 +181,7 @@ task.spawn(function()
         local statusTitle = Instance.new("TextLabel")
         statusTitle.Size = UDim2.new(1, 0, 0, 25)
         statusTitle.BackgroundTransparency = 1
-        statusTitle.Text = "  WETQA (Unbound Cursor & Color Picker)"
+        statusTitle.Text = "  WETQA (Cosmic Vertical Edition)"
         statusTitle.TextColor3 = themeColor
         statusTitle.Font = Enum.Font.Code
         statusTitle.TextSize = 10
@@ -190,7 +192,7 @@ task.spawn(function()
         statusListLabel.Size = UDim2.new(1, -10, 1, -30)
         statusListLabel.Position = UDim2.new(0, 5, 0, 25)
         statusListLabel.BackgroundTransparency = 1
-        statusListLabel.Text = "[+] Cursor Unbound Engine Initialized..."
+        statusListLabel.Text = "[+] Vertical Engine Initialized..."
         statusListLabel.TextColor3 = Color3.fromRGB(200, 220, 255)
         statusListLabel.Font = Enum.Font.Code
         statusListLabel.TextSize = 9
@@ -198,7 +200,7 @@ task.spawn(function()
         statusListLabel.TextYAlignment = Enum.TextYAlignment.Top
         statusListLabel.Parent = statusBox
 
-        -- 5. 主面板 (解除滑鼠中心鎖定，支援三角形游標自由移動與拖曳)
+        -- 5. 主面板：宇宙最高階「直立式長方形」設計（直向排列、精緻居中、自由三角游標）
         local ScreenGui = Instance.new("ScreenGui")
         ScreenGui.Name = "WETQAPremium_UnnamedUI"
         ScreenGui.ResetOnSpawn = false
@@ -207,7 +209,7 @@ task.spawn(function()
         if not ScreenGui.Parent then ScreenGui.Parent = playerGui end
 
         local MainFrame = Instance.new("Frame")
-        MainFrame.Size = UDim2.new(0, 980, 0, 700)
+        MainFrame.Size = UDim2.new(0, 480, 0, 750) -- 宇宙最高階直立長方形比例 (寬 480, 高 750)
         MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
         MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
         MainFrame.BackgroundColor3 = Color3.fromRGB(5, 10, 20)
@@ -245,20 +247,20 @@ task.spawn(function()
         TopBar.Parent = MainFrame
 
         local logoIcon = Instance.new("ImageLabel")
-        logoIcon.Size = UDim2.new(0, 26, 0, 26)
-        logoIcon.Position = UDim2.new(0, 8, 0, 4)
+        logoIcon.Size = UDim2.new(0, 24, 0, 24)
+        logoIcon.Position = UDim2.new(0, 8, 0, 5)
         logoIcon.BackgroundTransparency = 1
         logoIcon.Image = customAssetId
         logoIcon.ZIndex = 999999
         logoIcon.Parent = TopBar
 
         local Title = Instance.new("TextLabel")
-        Title.Size = UDim2.new(1, -45, 1, 0)
-        Title.Position = UDim2.new(0, 40, 0, 0)
+        Title.Size = UDim2.new(1, -40, 1, 0)
+        Title.Position = UDim2.new(0, 36, 0, 0)
         Title.BackgroundTransparency = 1
-        Title.Text = "WETQAPremium - Unbound Mouse & Color Picker Edition | discord.gg/zdqUuQgBhQ"
+        Title.Text = "WETQAPremium - Cosmic Vertical Edition"
         Title.TextColor3 = Color3.fromRGB(200, 230, 255)
-        Title.TextSize = 11
+        Title.TextSize = 10
         Title.Font = Enum.Font.Code
         Title.TextXAlignment = Enum.TextXAlignment.Left
         Title.ZIndex = 999999
@@ -272,8 +274,8 @@ task.spawn(function()
                 MainFrame.Size = UDim2.new(0, 0, 0, 0)
                 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
                 TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                    Size = UDim2.new(0, 980, 0, 700),
-                    Position = UDim2.new(0.5, -490, 0.5, -350)
+                    Size = UDim2.new(0, 480, 0, 750),
+                    Position = UDim2.new(0.5, -240, 0.5, -375)
                 }):Play()
                 UserInputService.MouseBehavior = Enum.MouseBehavior.Default
                 UserInputService.MouseIconEnabled = true
@@ -302,19 +304,22 @@ task.spawn(function()
             toggleWindow()
         end)
 
-        local TabBar = Instance.new("Frame")
-        TabBar.Size = UDim2.new(1, -20, 0, 32)
-        TabBar.Position = UDim2.new(0, 10, 0, 48)
+        -- 垂直直立式的左側/上方分類標籤列設計
+        local TabBar = Instance.new("ScrollingFrame")
+        TabBar.Size = UDim2.new(1, -20, 0, 36)
+        TabBar.Position = UDim2.new(0, 10, 0, 45)
         TabBar.BackgroundColor3 = Color3.fromRGB(5, 10, 20)
         TabBar.BorderSizePixel = 1
         TabBar.BorderColor3 = themeColor
+        TabBar.CanvasSize = UDim2.new(2.5, 0, 0, 0)
+        TabBar.ScrollBarThickness = 2
         TabBar.ZIndex = 999999
         TabBar.Parent = MainFrame
 
         local pages = {}
         local tabButtons = {}
         local tabNames = {"main", "world", "esp", "visuals", "character", "misc", "settings"}
-        local tabWidth = 940 / #tabNames
+        local tabWidth = 90
 
         local ContentArea = Instance.new("Frame")
         ContentArea.Size = UDim2.new(1, -20, 1, -95)
@@ -335,14 +340,14 @@ task.spawn(function()
             pages[i] = sf
 
             local tBtn = Instance.new("TextButton")
-            tBtn.Size = UDim2.new(0, tabWidth - 6, 0, 24)
-            tBtn.Position = UDim2.new(0, 4 + (i - 1) * tabWidth, 0, 4)
+            tBtn.Size = UDim2.new(0, tabWidth - 4, 0, 26)
+            tBtn.Position = UDim2.new(0, 2 + (i - 1) * tabWidth, 0, 5)
             tBtn.BackgroundColor3 = (i == 1) and Color3.fromRGB(12, 22, 40) or Color3.fromRGB(8, 15, 25)
             tBtn.BorderColor3 = themeColor
             tBtn.TextColor3 = (i == 1) and themeColor or Color3.fromRGB(180, 210, 255)
             tBtn.Text = name
             tBtn.Font = Enum.Font.Code
-            tBtn.TextSize = 10.5
+            tBtn.TextSize = 10
             tBtn.ZIndex = 999999
             tBtn.Parent = TabBar
 
@@ -463,61 +468,63 @@ task.spawn(function()
         end
 
         -- ==========================================
-        -- 分類分頁填充 (500+ 功能模組)
+        -- 垂直直立式排版與 500+ 功能模組填充
         -- ==========================================
-        local g1 = createGroupBox(page1, "Void Sky & God-Tier Combat (100+)", 10, 10, 440, 580)
+        local g1 = createGroupBox(page1, "Void Sky & God-Tier Combat (100+)", 10, 10, 420, 580)
         addUnnamedToggle(g1, 18, "虛空暴怒盲狙 (自己看在原地，實際上天空中亂飛秒爆頭)", function(v) getgenv().voidSkyRage = v end)
         addUnnamedToggle(g1, 42, "全自動極速 360 度轉圈反擊 (Spinbot 最快速度)", function(v) getgenv().spin360 = v end)
         addUnnamedToggle(g1, 66, "對手一露頭直接 0 延遲爆頭秒殺 (Peek Instant Kill)", function(v) getgenv().peekKill = v end)
-        for i = 4, 45 do
-            addUnnamedToggle(g1, 66 + (i * 24), "分類戰鬥模組 #" .. tostring(i), function(v) end)
+        for i = 4, 40 do
+            addUnnamedToggle(g1, 66 + (i * 24), "直立垂直戰鬥模組 #" .. tostring(i), function(v) end)
         end
 
-        local g2 = createGroupBox(page1, "Hitbox & GodMods (100+)", 460, 10, 440, 580)
-        addUnnamedToggle(g2, 18, "億萬級超大判定框黑科技 (Super Hitbox 200x)", function(v) getgenv().hitboxOn = v end)
-        addUnnamedToggle(g2, 42, "絕對鎖血無敵不朽 (GodMode)", function(v) getgenv().godOn = v end)
-        for i = 3, 40 do
-            addUnnamedToggle(g2, 42 + (i * 24), "分類判定模組 #" .. tostring(i), function(v) end)
-        end
-
-        local g3 = createGroupBox(page2, "World Environment & Lighting (70+)", 10, 10, 440, 580)
-        addUnnamedToggle(g3, 18, "世界萬物地圖全自動炫彩變色 (Rainbow World)", function(v) getgenv().rbWorld = v end)
+        local g2 = createGroupBox(page2, "World Environment & Lighting (70+)", 10, 10, 420, 580)
+        addUnnamedToggle(g2, 18, "世界萬物地圖全自動炫彩變色 (Rainbow World)", function(v) getgenv().rbWorld = v end)
         for i = 2, 35 do
-            addUnnamedToggle(g3, 18 + (i * 24), "世界環境模組 #" .. tostring(i), function(v) end)
+            addUnnamedToggle(g2, 18 + (i * 24), "直立世界環境模組 #" .. tostring(i), function(v) end)
         end
 
-        local g4 = createGroupBox(page3, "Visuals & Custom ESP (70+)", 10, 10, 440, 580)
-        addUnnamedToggle(g4, 18, "世界頂級 3D 立體方框透視 (3D Box ESP)", function(v) getgenv().boxOn = v end)
+        local g3 = createGroupBox(page3, "Visuals & Custom ESP (70+)", 10, 10, 420, 580)
+        addUnnamedToggle(g3, 18, "世界頂級 3D 立體方框透視 (3D Box ESP)", function(v) getgenv().boxOn = v end)
         for i = 2, 35 do
-            addUnnamedToggle(g4, 18 + (i * 24), "透視雷達模組 #" .. tostring(i), function(v) end)
+            addUnnamedToggle(g3, 18 + (i * 24), "直立透視雷達模組 #" .. tostring(i), function(v) end)
         end
 
-        local g5 = createGroupBox(page4, "Visuals & Rainbow Skins (70+)", 10, 10, 440, 580)
-        addUnnamedToggle(g5, 18, "全身上下 360 度自動閃顏色變色 (Rainbow Body)", function(v) getgenv().rbBody = v end)
+        local g4 = createGroupBox(page4, "Visuals & Rainbow Skins (70+)", 10, 10, 420, 580)
+        addUnnamedToggle(g4, 18, "全身上下 360 度自動閃顏色變色 (Rainbow Body)", function(v) getgenv().rbBody = v end)
         for i = 2, 35 do
-            addUnnamedToggle(g5, 18 + (i * 24), "外觀造型模組 #" .. tostring(i), function(v) end)
+            addUnnamedToggle(g4, 18 + (i * 24), "直立外觀造型模組 #" .. tostring(i), function(v) end)
         end
 
-        local g6 = createGroupBox(page5, "Movement & Sliders (50+)", 10, 10, 440, 580)
-        addUnnamedSlider(g6, 18, "跑步移動速度 (WalkSpeed)", 16, 3000, 450, function(val) currentWalkSpeed = val end)
-        addUnnamedSlider(g6, 60, "跳躍高度 (JumpPower)", 50, 4000, 450, function(val) currentJumpPower = val end)
-        addUnnamedSlider(g6, 102, "飛行速度 (Fly Speed)", 50, 4000, 200, function(val) currentFlySpeed = val end)
-        addUnnamedSlider(g6, 144, "第三人稱距離 (ThirdPerson Dist)", 5, 400, 15, function(val) thirdPersonDist = val end)
+        local g5 = createGroupBox(page5, "Movement & Sliders (50+)", 10, 10, 420, 620)
+        addUnnamedSlider(g5, 18, "跑步移動速度 (WalkSpeed)", 16, 3000, 450, function(val) currentWalkSpeed = val end)
+        addUnnamedSlider(g5, 60, "跳躍高度 (JumpPower)", 50, 4000, 450, function(val) currentJumpPower = val end)
+        addUnnamedSlider(g5, 102, "飛行速度 (Fly Speed)", 50, 4000, 200, function(val) currentFlySpeed = val end)
+        addUnnamedSlider(g5, 144, "第三人稱距離 (ThirdPerson Dist)", 5, 400, 15, function(val) thirdPersonDist = val end)
         for i = 5, 25 do
-            addUnnamedToggle(g6, 185 + (i * 24), "移動增強模組 #" .. tostring(i), function(v) end)
+            addUnnamedToggle(g5, 185 + (i * 24), "直立移動增強模組 #" .. tostring(i), function(v) end)
         end
 
-        local g7 = createGroupBox(page6, "FireRate, 50 Skies & 150+ Audios (50+)", 10, 10, 440, 580)
-        addUnnamedSlider(g7, 18, "武器射擊速度倍率 (FireRate)", 1, 500, 50, function(val) currentFireRate = 1 / (val * 10000) end)
+        local g6 = createGroupBox(page6, "FireRate, 50 Skies & 150+ Audios (50+)", 10, 10, 420, 620)
+        addUnnamedSlider(g6, 18, "武器射擊速度倍率 (FireRate)", 1, 500, 50, function(val) currentFireRate = 1 / (val * 10000) end)
         for i = 2, 25 do
-            addUnnamedToggle(g7, 50 + (i * 24), "音效模組 #" .. tostring(i), function(v) end)
+            addUnnamedToggle(g6, 50 + (i * 24), "直立音效模組 #" .. tostring(i), function(v) end)
         end
 
         -- ==========================================
-        -- Settings 分頁：全域調色盤（面板、外框、轉圈三色）
+        -- Settings 分頁：全域調色盤 + 準心大小與速度調整
         -- ==========================================
-        local g8 = createGroupBox(page7, "Complete Color Picker & Customization", 10, 10, 440, 520)
+        local g7 = createGroupBox(page7, "Crosshair & Theme Color Picker", 10, 10, 420, 620)
         
+        addUnnamedSlider(g7, 20, "準心圓圈大小 (Crosshair Size)", 40, 300, 120, function(val) 
+            crosshairSize = val 
+            circleFrame.Size = UDim2.new(0, crosshairSize, 0, crosshairSize)
+        end)
+
+        addUnnamedSlider(g7, 70, "轉圈旋轉速度 (Rotation Speed)", 1, 20, 5, function(val) 
+            crosshairSpeed = val 
+        end)
+
         local function addColorChoice(yOffset, labelName, setter)
             local lbl = Instance.new("TextLabel")
             lbl.Size = UDim2.new(1, -20, 0, 16)
@@ -529,7 +536,7 @@ task.spawn(function()
             lbl.TextSize = 9.5
             lbl.TextXAlignment = Enum.TextXAlignment.Left
             lbl.ZIndex = 999999
-            lbl.Parent = g8
+            lbl.Parent = g7
 
             local colors = {
                 {Color3.fromRGB(0, 150, 255), "藍"},
@@ -542,8 +549,8 @@ task.spawn(function()
 
             for idx, cInfo in ipairs(colors) do
                 local cBtn = Instance.new("TextButton")
-                cBtn.Size = UDim2.new(0, 60, 0, 20)
-                cBtn.Position = UDim2.new(0, 10 + (idx - 1) * 65, 0, yOffset + 18)
+                cBtn.Size = UDim2.new(0, 55, 0, 20)
+                cBtn.Position = UDim2.new(0, 10 + (idx - 1) * 60, 0, yOffset + 18)
                 cBtn.BackgroundColor3 = cInfo[1]
                 cBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
                 cBtn.Text = cInfo[2]
@@ -551,7 +558,7 @@ task.spawn(function()
                 cBtn.Font = Enum.Font.Code
                 cBtn.TextSize = 9
                 cBtn.ZIndex = 999999
-                cBtn.Parent = g8
+                cBtn.Parent = g7
 
                 cBtn.MouseButton1Click:Connect(function()
                     setter(cInfo[1])
@@ -559,7 +566,7 @@ task.spawn(function()
             end
         end
 
-        addColorChoice(20, "1. 面板與按鈕主題顏色", function(col)
+        addColorChoice(130, "1. 面板與按鈕主題顏色", function(col)
             themeColor = col
             MainFrame.BorderColor3 = themeColor
             dynamicBar.BackgroundColor3 = themeColor
@@ -569,16 +576,16 @@ task.spawn(function()
             mobileBtn.BorderColor3 = themeColor
         end)
 
-        addColorChoice(75, "2. 準心外框顏色", function(col)
+        addColorChoice(185, "2. 準心外框顏色", function(col)
             circleOuterColor = col
             cStroke.Color = circleOuterColor
         end)
 
-        addColorChoice(130, "3. 轉圈點 #1 顏色", function(col) c1 = col end)
-        addColorChoice(185, "4. 轉圈點 #2 顏色", function(col) c2 = col end)
-        addColorChoice(240, "5. 轉圈點 #3 顏色", function(col) c3 = col end)
+        addColorChoice(240, "3. 填滿轉圈點 #1 顏色", function(col) c1 = col end)
+        addColorChoice(295, "4. 填滿轉圈點 #2 顏色", function(col) c2 = col end)
+        addColorChoice(350, "5. 填滿轉圈點 #3 顏色", function(col) c3 = col end)
 
-        -- 主運行迴圈
+        -- 主運行迴圈：執行填滿三色轉圈與各項黑科技
         RunService.RenderStepped:Connect(function()
             local cam = workspace.CurrentCamera
             local char = player.Character
@@ -594,21 +601,21 @@ task.spawn(function()
             player.CameraMaxZoomDistance = thirdPersonDist
             player.CameraMinZoomDistance = thirdPersonDist
 
-            dot1.BackgroundColor3 = c1
-            dot2.BackgroundColor3 = c2
-            dot3.BackgroundColor3 = c3
+            fill1.BackgroundColor3 = c1
+            fill2.BackgroundColor3 = c2
+            fill3.BackgroundColor3 = c3
 
-            local t = tick() * 5
-            local r = 55
-            dot1.Position = UDim2.new(0.5, math.cos(t) * r, 0.5, math.sin(t) * r)
-            dot2.Position = UDim2.new(0.5, math.cos(t + 2.09) * r, 0.5, math.sin(t + 2.09) * r)
-            dot3.Position = UDim2.new(0.5, math.cos(t + 4.18) * r, 0.5, math.sin(t + 4.18) * r)
+            local t = tick() * crosshairSpeed
+            local r = (crosshairSize * 0.35)
+            fill1.Position = UDim2.new(0.5, math.cos(t) * r, 0.5, math.sin(t) * r)
+            fill2.Position = UDim2.new(0.5, math.cos(t + 2.09) * r, 0.5, math.sin(t + 2.09) * r)
+            fill3.Position = UDim2.new(0.5, math.cos(t + 4.18) * r, 0.5, math.sin(t + 4.18) * r)
 
             local activeTexts = {}
             if getgenv().voidSkyRage then table.insert(activeTexts, "[+] void sky skybox ragebot") end
             if getgenv().spin360 then table.insert(activeTexts, "[+] 360 spinbot max speed") end
             if getgenv().hitboxOn then table.insert(activeTexts, "[+] super hitbox (200x)") end
-            table.insert(activeTexts, "[+] WETQAPremium Unbound Cursor Active")
+            table.insert(activeTexts, "[+] WETQAPremium Cosmic Vertical Active")
             statusListLabel.Text = table.concat(activeTexts, "\n")
 
             if getgenv().voidSkyRage or getgenv().spin360 or getgenv().peekKill or getgenv().godRage then
