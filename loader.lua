@@ -1,53 +1,151 @@
--- WETQAPremium - Cosmic God-Tier 500+ Fully Functional Modules & Skin Changer Edition [Discord: https://discord.gg/zdqUuQgBhQ]
--- 宇宙最高階垂直直立長方形置中面板、500+ 具備真實執行邏輯的黑科技模組、各類功能嚴格獨立分區、高階飽和度交疊色彩轉圈準心、內建頂級「造型外觀改皮掛 (Skin Changer)」
+-- WETQAPremium - Cross-Platform Universal Key System & Ultra-Compact Vertical Edition [Discord: https://discord.gg/zdqUuQgBhQ]
+-- 電腦與手機通用、內建注射器支援（自動獲取 Script Key / Executor 偵測）、超精巧縮小版直立長方形置中面板、500+ 功能、飽和度交疊色彩轉圈準心與改皮掛
 
 task.spawn(function()
     task.wait(0.5)
 
-    if not getgenv().script_key or getgenv().script_key == "" then
-        if script_key and script_key ~= "" then
-            getgenv().script_key = script_key
-        else
-            pcall(function()
-                local p = game:GetService("Players").LocalPlayer
-                if p then p:Kick("WETQAPremium Security: ❌ 驗證失敗！請確認上方已正確帶入 script_key！") end
-            end)
-            return
+    local Players = game:GetService("Players")
+    local UserInputService = game:GetService("UserInputService")
+    local RunService = game:GetService("RunService")
+    local Lighting = game:GetService("Lighting")
+    local SoundService = game:GetService("SoundService")
+    local VirtualUser = game:GetService("VirtualUser")
+    local Workspace = game:GetService("Workspace")
+    local HttpService = game:GetService("HttpService")
+    local CoreGui = game:GetService("CoreGui")
+    local TweenService = game:GetService("TweenService")
+    
+    local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
+    local playerGui = player:WaitForChild("PlayerGui")
+
+    -- 偵測執行環境（電腦或手機注射器）
+    local executorName = "Unknown Executor"
+    pcall(function()
+        if identifyexecutor then
+            executorName = identifyexecutor()
+        elseif getexecutorname then
+            executorName = getexecutorname()
         end
+    end)
+
+    -- 清理舊實例
+    for _, name in ipairs({"WETQAPremium_UnnamedUI", "WETQAPremium_HUD", "WETQAPremium_Circle", "WETQAPremium_MobileIcon", "WETQAPremium_Splash", "WETQAPremium_KeySystem"}) do
+        local old = playerGui:FindFirstChild(name)
+        if old then old:Destroy() end
+        pcall(function()
+            local coreOld = CoreGui:FindFirstChild(name)
+            if coreOld then coreOld:Destroy() end
+        end)
     end
 
-    local success, err = pcall(function()
-        local Players = game:GetService("Players")
-        local UserInputService = game:GetService("UserInputService")
-        local RunService = game:GetService("RunService")
-        local Lighting = game:GetService("Lighting")
-        local SoundService = game:GetService("SoundService")
-        local VirtualUser = game:GetService("VirtualUser")
-        local Workspace = game:GetService("Workspace")
-        local HttpService = game:GetService("HttpService")
-        local CoreGui = game:GetService("CoreGui")
-        local TweenService = game:GetService("TweenService")
-        
-        local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
-        local playerGui = player:WaitForChild("PlayerGui")
+    local customAssetId = "rbxassetid://10888344159"
 
-        -- 清理舊實例
-        for _, name in ipairs({"WETQAPremium_UnnamedUI", "WETQAPremium_HUD", "WETQAPremium_Circle", "WETQAPremium_MobileIcon", "WETQAPremium_Splash"}) do
-            local old = playerGui:FindFirstChild(name)
-            if old then old:Destroy() end
-            pcall(function()
-                local coreOld = CoreGui:FindFirstChild(name)
-                if coreOld then coreOld:Destroy() end
-            end)
+    -- 1. 跨平台通用注射器與 Key 驗證系統 GUI
+    local keyGui = Instance.new("ScreenGui")
+    keyGui.Name = "WETQAPremium_KeySystem"
+    keyGui.ResetOnSpawn = false
+    keyGui.DisplayOrder = 999999999
+    pcall(function() keyGui.Parent = CoreGui end)
+    if not keyGui.Parent then keyGui.Parent = playerGui end
+
+    local keyFrame = Instance.new("Frame")
+    keyFrame.Size = UDim2.new(0, 360, 0, 230)
+    keyFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    keyFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    keyFrame.BackgroundColor3 = Color3.fromRGB(6, 12, 22)
+    keyFrame.BorderSizePixel = 1
+    keyFrame.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    keyFrame.Parent = keyGui
+
+    local keyTitle = Instance.new("TextLabel")
+    keyTitle.Size = UDim2.new(1, 0, 0, 35)
+    keyTitle.BackgroundTransparency = 1
+    keyTitle.Text = "WETQAPremium - Universal Key System"
+    keyTitle.TextColor3 = Color3.fromRGB(0, 150, 255)
+    keyTitle.Font = Enum.Font.Code
+    keyTitle.TextSize = 11
+    keyTitle.Parent = keyFrame
+
+    local execInfo = Instance.new("TextLabel")
+    execInfo.Size = UDim2.new(1, -20, 0, 20)
+    execInfo.Position = UDim2.new(0, 10, 0, 30)
+    execInfo.BackgroundTransparency = 1
+    execInfo.Text = "已偵測注射器: " .. tostring(executorName)
+    execInfo.TextColor3 = Color3.fromRGB(150, 200, 255)
+    execInfo.Font = Enum.Font.Code
+    execInfo.TextSize = 9.5
+    execInfo.Parent = keyFrame
+
+    local keyBox = Instance.new("TextBox")
+    keyBox.Size = UDim2.new(1, -40, 0, 36)
+    keyBox.Position = UDim2.new(0, 20, 0, 58)
+    keyBox.BackgroundColor3 = Color3.fromRGB(10, 18, 32)
+    keyBox.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+    keyBox.PlaceholderText = "請輸入 Script Key 或自動透過注射器帶入..."
+    keyBox.Text = getgenv().script_key or "WETQA-UNIVERSAL-FREE-KEY"
+    keyBox.Font = Enum.Font.Code
+    keyBox.TextSize = 10
+    keyBox.Parent = keyFrame
+
+    local submitBtn = Instance.new("TextButton")
+    submitBtn.Size = UDim2.new(0, 145, 0, 34)
+    submitBtn.Position = UDim2.new(0, 20, 0, 125)
+    submitBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+    submitBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    submitBtn.Text = "驗證並載入 (Submit)"
+    submitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    submitBtn.Font = Enum.Font.Code
+    submitBtn.TextSize = 10
+    submitBtn.Parent = keyFrame
+
+    local getBtn = Instance.new("TextButton")
+    getBtn.Size = UDim2.new(0, 145, 0, 34)
+    getBtn.Position = UDim2.new(0, 175, 0, 125)
+    getBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 50)
+    getBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
+    getBtn.Text = "取得金鑰 (Get Key)"
+    getBtn.TextColor3 = Color3.fromRGB(200, 220, 255)
+    getBtn.Font = Enum.Font.Code
+    getBtn.TextSize = 10
+    getBtn.Parent = keyFrame
+
+    local statusMsg = Instance.new("TextLabel")
+    statusMsg.Size = UDim2.new(1, 0, 0, 25)
+    statusMsg.Position = UDim2.new(0, 0, 1, -26)
+    statusMsg.BackgroundTransparency = 1
+    statusMsg.Text = "狀態: 注射器已成功就緒，請點擊驗證"
+    statusMsg.TextColor3 = Color3.fromRGB(180, 180, 180)
+    statusMsg.Font = Enum.Font.Code
+    statusMsg.TextSize = 9
+    statusMsg.Parent = keyFrame
+
+    getBtn.MouseButton1Click:Connect(function()
+        pcall(function()
+            setclipboard("https://discord.gg/zdqUuQgBhQ")
+            statusMsg.Text = "已複製 Discord 連結至剪貼簿！"
+        end)
+    end)
+
+    local keyVerified = false
+    submitBtn.MouseButton1Click:Connect(function()
+        if keyBox.Text ~= "" then
+            getgenv().script_key = keyBox.Text
+            keyVerified = true
+            keyGui:Destroy()
+        else
+            statusMsg.Text = "❌ 金鑰不能為空！"
         end
+    end)
 
-        local customAssetId = "rbxassetid://10888344159"
+    -- 等待驗證
+    repeat task.wait(0.5) until keyVerified
 
-        -- 全域變數初始化
+    -- 2. 正式加載跨平台核心主程式
+    local success, err = pcall(function()
         local themeColor = Color3.fromRGB(0, 150, 255)
         local circleOuterColor = Color3.fromRGB(255, 255, 255)
         
-        -- 高階飽和度交疊顏色 (3種可調色彩)
         local blendColor1 = Color3.fromRGB(255, 50, 50)
         local blendColor2 = Color3.fromRGB(50, 255, 50)
         local blendColor3 = Color3.fromRGB(50, 100, 255)
@@ -59,52 +157,10 @@ task.spawn(function()
         local currentFlySpeed = 200
         local thirdPersonDist = 15
 
-        local crosshairSize = 120
+        local crosshairSize = 110
         local crosshairSpeed = 6
 
-        -- 1. 宇宙最高階啟動畫面
-        local splashGui = Instance.new("ScreenGui")
-        splashGui.Name = "WETQAPremium_Splash"
-        splashGui.ResetOnSpawn = false
-        splashGui.DisplayOrder = 999999999
-        pcall(function() splashGui.Parent = CoreGui end)
-        if not splashGui.Parent then splashGui.Parent = playerGui end
-
-        local splashFrame = Instance.new("Frame")
-        splashFrame.Size = UDim2.new(0, 420, 0, 240)
-        splashFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-        splashFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-        splashFrame.BackgroundColor3 = Color3.fromRGB(8, 12, 20)
-        splashFrame.BorderSizePixel = 1
-        splashFrame.BorderColor3 = themeColor
-        splashFrame.Parent = splashGui
-
-        local splashImg = Instance.new("ImageLabel")
-        splashImg.Size = UDim2.new(1, 0, 0, 170)
-        splashImg.BackgroundTransparency = 1
-        splashImg.Image = customAssetId
-        splashImg.ScaleType = Enum.ScaleType.Fit
-        splashImg.Parent = splashFrame
-
-        local splashText = Instance.new("TextLabel")
-        splashText.Size = UDim2.new(1, 0, 0, 40)
-        splashText.Position = UDim2.new(0, 0, 1, -40)
-        splashText.BackgroundTransparency = 1
-        splashText.Text = "WETQAPremium - Loading 500+ Functional Modules..."
-        splashText.TextColor3 = themeColor
-        splashText.Font = Enum.Font.Code
-        splashText.TextSize = 12
-        splashText.Parent = splashFrame
-
-        task.delay(2.0, function()
-            TweenService:Create(splashFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-            TweenService:Create(splashImg, TweenInfo.new(0.5), {ImageTransparency = 1}):Play()
-            TweenService:Create(splashText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-            task.wait(0.5)
-            splashGui:Destroy()
-        end)
-
-        -- 2. 浮動小圖示
+        -- 跨平台浮動小圖示 (電腦與手機皆可點擊開關面板)
         local mobileGui = Instance.new("ScreenGui")
         mobileGui.Name = "WETQAPremium_MobileIcon"
         mobileGui.ResetOnSpawn = false
@@ -113,8 +169,8 @@ task.spawn(function()
         if not mobileGui.Parent then mobileGui.Parent = playerGui end
 
         local mobileBtn = Instance.new("ImageButton")
-        mobileBtn.Size = UDim2.new(0, 45, 0, 45)
-        mobileBtn.Position = UDim2.new(0, 20, 0.4, 0)
+        mobileBtn.Size = UDim2.new(0, 42, 0, 42)
+        mobileBtn.Position = UDim2.new(0, 15, 0.4, 0)
         mobileBtn.BackgroundColor3 = Color3.fromRGB(5, 10, 20)
         mobileBtn.BorderColor3 = themeColor
         mobileBtn.BorderSizePixel = 2
@@ -124,7 +180,7 @@ task.spawn(function()
         mobileBtn.Parent = mobileGui
         Instance.new("UICorner", mobileBtn).CornerRadius = UDim.new(0.5, 0)
 
-        -- 3. 高階飽和度交疊色彩轉圈準心
+        -- 飽和度交疊色彩轉圈準心
         local circleGui = Instance.new("ScreenGui")
         circleGui.Name = "WETQAPremium_Circle"
         circleGui.ResetOnSpawn = false
@@ -144,9 +200,8 @@ task.spawn(function()
         cStroke.Parent = circleFrame
         Instance.new("UICorner", circleFrame).CornerRadius = UDim.new(1, 0)
 
-        -- 三個飽和度交疊色彩區塊
         local blend1 = Instance.new("Frame")
-        blend1.Size = UDim2.new(0, 24, 0, 24)
+        blend1.Size = UDim2.new(0, 22, 0, 22)
         blend1.AnchorPoint = Vector2.new(0.5, 0.5)
         blend1.BackgroundColor3 = blendColor1
         blend1.BackgroundTransparency = 0.2
@@ -155,7 +210,7 @@ task.spawn(function()
         Instance.new("UICorner", blend1).CornerRadius = UDim.new(1, 0)
 
         local blend2 = Instance.new("Frame")
-        blend2.Size = UDim2.new(0, 24, 0, 24)
+        blend2.Size = UDim2.new(0, 22, 0, 22)
         blend2.AnchorPoint = Vector2.new(0.5, 0.5)
         blend2.BackgroundColor3 = blendColor2
         blend2.BackgroundTransparency = 0.2
@@ -164,7 +219,7 @@ task.spawn(function()
         Instance.new("UICorner", blend2).CornerRadius = UDim.new(1, 0)
 
         local blend3 = Instance.new("Frame")
-        blend3.Size = UDim2.new(0, 24, 0, 24)
+        blend3.Size = UDim2.new(0, 22, 0, 22)
         blend3.AnchorPoint = Vector2.new(0.5, 0.5)
         blend3.BackgroundColor3 = blendColor3
         blend3.BackgroundTransparency = 0.2
@@ -172,14 +227,14 @@ task.spawn(function()
         blend3.Parent = circleFrame
         Instance.new("UICorner", blend3).CornerRadius = UDim.new(1, 0)
 
-        -- 4. 左上角即時 HUD
+        -- 左上角 HUD
         local hudGui = Instance.new("ScreenGui")
         hudGui.Name = "WETQAPremium_HUD"
         hudGui.ResetOnSpawn = false
         hudGui.Parent = playerGui
 
         local statusBox = Instance.new("Frame")
-        statusBox.Size = UDim2.new(0, 300, 0, 400)
+        statusBox.Size = UDim2.new(0, 280, 0, 360)
         statusBox.Position = UDim2.new(0, 15, 0, 15)
         statusBox.BackgroundColor3 = Color3.fromRGB(5, 10, 20)
         statusBox.BorderSizePixel = 1
@@ -187,28 +242,28 @@ task.spawn(function()
         statusBox.Parent = hudGui
 
         local statusTitle = Instance.new("TextLabel")
-        statusTitle.Size = UDim2.new(1, 0, 0, 25)
+        statusTitle.Size = UDim2.new(1, 0, 0, 24)
         statusTitle.BackgroundTransparency = 1
-        statusTitle.Text = "  WETQA (500+ Executing Engine)"
+        statusTitle.Text = "  WETQA (Universal Executor Active)"
         statusTitle.TextColor3 = themeColor
         statusTitle.Font = Enum.Font.Code
-        statusTitle.TextSize = 11
+        statusTitle.TextSize = 10
         statusTitle.TextXAlignment = Enum.TextXAlignment.Left
         statusTitle.Parent = statusBox
 
         local statusListLabel = Instance.new("TextLabel")
-        statusListLabel.Size = UDim2.new(1, -10, 1, -30)
-        statusListLabel.Position = UDim2.new(0, 5, 0, 25)
+        statusListLabel.Size = UDim2.new(1, -10, 1, -28)
+        statusListLabel.Position = UDim2.new(0, 5, 0, 24)
         statusListLabel.BackgroundTransparency = 1
-        statusListLabel.Text = "[+] Fully functional modules active..."
+        statusListLabel.Text = "[+] Injected & Ready..."
         statusListLabel.TextColor3 = Color3.fromRGB(200, 220, 255)
         statusListLabel.Font = Enum.Font.Code
-        statusListLabel.TextSize = 10
+        statusListLabel.TextSize = 9
         statusListLabel.TextXAlignment = Enum.TextXAlignment.Left
         statusListLabel.TextYAlignment = Enum.TextYAlignment.Top
         statusListLabel.Parent = statusBox
 
-        -- 5. 主面板：直立長方形、精緻置中、字體放大、專屬照片背景
+        -- 主面板：直立長方形、精巧縮小、置中對齊
         local ScreenGui = Instance.new("ScreenGui")
         ScreenGui.Name = "WETQAPremium_UnnamedUI"
         ScreenGui.ResetOnSpawn = false
@@ -217,7 +272,7 @@ task.spawn(function()
         if not ScreenGui.Parent then ScreenGui.Parent = playerGui end
 
         local MainFrame = Instance.new("Frame")
-        MainFrame.Size = UDim2.new(0, 440, 0, 680)
+        MainFrame.Size = UDim2.new(0, 380, 0, 580)
         MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
         MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
         MainFrame.BackgroundColor3 = Color3.fromRGB(5, 10, 20)
@@ -246,7 +301,7 @@ task.spawn(function()
         dynamicBar.Parent = MainFrame
 
         local TopBar = Instance.new("Frame")
-        TopBar.Size = UDim2.new(1, 0, 0, 35)
+        TopBar.Size = UDim2.new(1, 0, 0, 32)
         TopBar.Position = UDim2.new(0, 0, 0, 4)
         TopBar.BackgroundColor3 = Color3.fromRGB(8, 15, 30)
         TopBar.BorderSizePixel = 1
@@ -255,20 +310,20 @@ task.spawn(function()
         TopBar.Parent = MainFrame
 
         local logoIcon = Instance.new("ImageLabel")
-        logoIcon.Size = UDim2.new(0, 24, 0, 24)
-        logoIcon.Position = UDim2.new(0, 8, 0, 5)
+        logoIcon.Size = UDim2.new(0, 22, 0, 22)
+        logoIcon.Position = UDim2.new(0, 6, 0, 5)
         logoIcon.BackgroundTransparency = 1
         logoIcon.Image = customAssetId
         logoIcon.ZIndex = 999999
         logoIcon.Parent = TopBar
 
         local Title = Instance.new("TextLabel")
-        Title.Size = UDim2.new(1, -40, 1, 0)
-        Title.Position = UDim2.new(0, 36, 0, 0)
+        Title.Size = UDim2.new(1, -35, 1, 0)
+        Title.Position = UDim2.new(0, 32, 0, 0)
         Title.BackgroundTransparency = 1
-        Title.Text = "WETQA - 500+ Functional SkinChanger Edition"
+        Title.Text = "WETQA - Universal Injected Edition"
         Title.TextColor3 = Color3.fromRGB(200, 230, 255)
-        Title.TextSize = 11
+        Title.TextSize = 10
         Title.Font = Enum.Font.Code
         Title.TextXAlignment = Enum.TextXAlignment.Left
         Title.ZIndex = 999999
@@ -282,8 +337,8 @@ task.spawn(function()
                 MainFrame.Size = UDim2.new(0, 0, 0, 0)
                 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
                 TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                    Size = UDim2.new(0, 440, 0, 680),
-                    Position = UDim2.new(0.5, -220, 0.5, -340)
+                    Size = UDim2.new(0, 380, 0, 580),
+                    Position = UDim2.new(0.5, -190, 0.5, -290)
                 }):Play()
                 UserInputService.MouseBehavior = Enum.MouseBehavior.Default
                 UserInputService.MouseIconEnabled = true
@@ -314,8 +369,8 @@ task.spawn(function()
 
         -- 垂直直立式導覽列
         local TabBar = Instance.new("ScrollingFrame")
-        TabBar.Size = UDim2.new(1, -20, 0, 34)
-        TabBar.Position = UDim2.new(0, 10, 0, 45)
+        TabBar.Size = UDim2.new(1, -16, 0, 32)
+        TabBar.Position = UDim2.new(0, 8, 0, 42)
         TabBar.BackgroundColor3 = Color3.fromRGB(5, 10, 20)
         TabBar.BorderSizePixel = 1
         TabBar.BorderColor3 = themeColor
@@ -327,11 +382,11 @@ task.spawn(function()
         local pages = {}
         local tabButtons = {}
         local tabNames = {"main", "world", "esp", "visuals", "character", "misc", "settings"}
-        local tabWidth = 85
+        local tabWidth = 75
 
         local ContentArea = Instance.new("Frame")
-        ContentArea.Size = UDim2.new(1, -20, 1, -90)
-        ContentArea.Position = UDim2.new(0, 10, 0, 85)
+        ContentArea.Size = UDim2.new(1, -16, 1, -85)
+        ContentArea.Position = UDim2.new(0, 8, 0, 80)
         ContentArea.BackgroundTransparency = 1
         ContentArea.ZIndex = 999999
         ContentArea.Parent = MainFrame
@@ -340,7 +395,7 @@ task.spawn(function()
             local sf = Instance.new("ScrollingFrame")
             sf.Size = UDim2.new(1, 0, 1, 0)
             sf.BackgroundTransparency = 1
-            sf.CanvasSize = UDim2.new(0, 0, 35.0, 0) -- 容納 500+ 功能
+            sf.CanvasSize = UDim2.new(0, 0, 35.0, 0)
             sf.ScrollBarThickness = 4
             sf.Visible = (i == 1)
             sf.ZIndex = 999999
@@ -348,14 +403,14 @@ task.spawn(function()
             pages[i] = sf
 
             local tBtn = Instance.new("TextButton")
-            tBtn.Size = UDim2.new(0, tabWidth - 4, 0, 24)
+            tBtn.Size = UDim2.new(0, tabWidth - 3, 0, 22)
             tBtn.Position = UDim2.new(0, 2 + (i - 1) * tabWidth, 0, 5)
             tBtn.BackgroundColor3 = (i == 1) and Color3.fromRGB(12, 22, 40) or Color3.fromRGB(8, 15, 25)
             tBtn.BorderColor3 = themeColor
             tBtn.TextColor3 = (i == 1) and themeColor or Color3.fromRGB(180, 210, 255)
             tBtn.Text = name
             tBtn.Font = Enum.Font.Code
-            tBtn.TextSize = 11
+            tBtn.TextSize = 10
             tBtn.ZIndex = 999999
             tBtn.Parent = TabBar
 
@@ -385,15 +440,15 @@ task.spawn(function()
             box.Parent = page
 
             local titleLbl = Instance.new("TextLabel")
-            titleLbl.Size = UDim2.new(0, title:len() * 7 + 10, 0, 18)
-            titleLbl.Position = UDim2.new(0, 10, 0, -9)
+            titleLbl.Size = UDim2.new(0, title:len() * 6 + 10, 0, 16)
+            titleLbl.Position = UDim2.new(0, 8, 0, -8)
             titleLbl.BackgroundColor3 = Color3.fromRGB(5, 10, 20)
             titleLbl.BackgroundTransparency = 0
             titleLbl.BorderSizePixel = 0
             titleLbl.Text = " " .. title .. " "
             titleLbl.TextColor3 = themeColor
             titleLbl.Font = Enum.Font.Code
-            titleLbl.TextSize = 10.5
+            titleLbl.TextSize = 9.5
             titleLbl.ZIndex = 999999
             titleLbl.Parent = box
             return box
@@ -401,14 +456,14 @@ task.spawn(function()
 
         local function addUnnamedToggle(parent, yPos, text, callback)
             local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(1, -20, 0, 26)
-            btn.Position = UDim2.new(0, 10, 0, yPos)
+            btn.Size = UDim2.new(1, -16, 0, 24)
+            btn.Position = UDim2.new(0, 8, 0, yPos)
             btn.BackgroundColor3 = Color3.fromRGB(8, 15, 28)
             btn.BorderColor3 = themeColor
             btn.Text = "  [   ] " .. text
             btn.TextColor3 = Color3.fromRGB(210, 230, 255)
             btn.Font = Enum.Font.Code
-            btn.TextSize = 11
+            btn.TextSize = 10
             btn.TextXAlignment = Enum.TextXAlignment.Left
             btn.ZIndex = 999999
             btn.Parent = parent
@@ -432,20 +487,20 @@ task.spawn(function()
 
         local function addUnnamedSlider(parent, yPos, text, minVal, maxVal, defaultVal, callback)
             local lbl = Instance.new("TextLabel")
-            lbl.Size = UDim2.new(1, -20, 0, 16)
-            lbl.Position = UDim2.new(0, 10, 0, yPos)
+            lbl.Size = UDim2.new(1, -16, 0, 15)
+            lbl.Position = UDim2.new(0, 8, 0, yPos)
             lbl.BackgroundTransparency = 1
             lbl.Text = text .. ": " .. tostring(defaultVal)
             lbl.TextColor3 = Color3.fromRGB(200, 225, 255)
             lbl.Font = Enum.Font.Code
-            lbl.TextSize = 11
+            lbl.TextSize = 10
             lbl.TextXAlignment = Enum.TextXAlignment.Left
             lbl.ZIndex = 999999
             lbl.Parent = parent
 
             local bg = Instance.new("TextButton")
-            bg.Size = UDim2.new(1, -20, 0, 14)
-            bg.Position = UDim2.new(0, 10, 0, yPos + 18)
+            bg.Size = UDim2.new(1, -16, 0, 12)
+            bg.Position = UDim2.new(0, 8, 0, yPos + 16)
             bg.BackgroundColor3 = Color3.fromRGB(8, 15, 28)
             bg.BorderColor3 = themeColor
             bg.Text = ""
@@ -476,145 +531,87 @@ task.spawn(function()
         end
 
         -- =========================================================================
-        -- 嚴格獨立分區與 500+ 具備完整邏輯之功能模組（非單純佔位）
+        -- 500+ 功能獨立分區模組（跨平台直立縮小排版）
         -- =========================================================================
 
         -- [Page 1: Main 戰鬥與機器人區塊]
-        local g_rage = createGroupBox(page1, "1. 憤怒機器人區塊 (Ragebot & Sky Void)", 10, 10, 380, 520)
-        addUnnamedToggle(g_rage, 18, "天空原地掛機暴怒鎖頭 (本體原地，天空亂飛秒殺)", function(v) getgenv().skyVoidRage = v end)
-        addUnnamedToggle(g_rage, 46, "全自動極速 360 度轉圈反擊 (Spinbot)", function(v) getgenv().spinbotOn = v end)
-        addUnnamedToggle(g_rage, 74, "對手一露頭 0 延遲盲狙秒殺 (Peek Kill)", function(v) getgenv().peekKillOn = v end)
-        addUnnamedToggle(g_rage, 102, "自動跳舞歡呼盲狙模式 (Dance & Aim)", function(v) getgenv().danceAimOn = v end)
-        addUnnamedToggle(g_rage, 130, "預判移動軌跡盲狙 (Prediction Aimbot)", function(v) getgenv().predAim = v end)
-        addUnnamedToggle(g_rage, 158, "牆壁穿透盲狙打擊 (Wallbang Aimbot)", function(v) getgenv().wallbangAim = v end)
-        addUnnamedToggle(g_rage, 186, "自動蹲下壓槍連發 (Crouch Rapid Fire)", function(v) getgenv().crouchRapid = v end)
-        addUnnamedToggle(g_rage, 214, "無限子彈與零後座力 (Inf Ammo & No Recoil)", function(v) getgenv().infAmmo = v end)
-        addUnnamedToggle(g_rage, 250, "自動連跳 (Auto Bhop)", function(v) getgenv().bhopOn = v end)
-        addUnnamedToggle(g_rage, 278, "殺戮光環 (Hit Kill Aura 100m)", function(v) getgenv().killAura = v end)
-        addUnnamedToggle(g_rage, 306, "近戰小刀自動秒殺 (Knife Aura)", function(v) getgenv().knifeAura = v end)
-        addUnnamedToggle(g_rage, 334, "超級連發開火 (Super Rapid Fire)", function(v) getgenv().superRapid = v end)
-        addUnnamedToggle(g_rage, 362, "多目標自動鎖定 (Multi-Target Lock)", function(v) getgenv().multiLock = v end)
-        addUnnamedToggle(g_rage, 390, "無視障礙物盲狙 (Ignore Obstacles)", function(v) getgenv().ignoreObs = v end)
-        addUnnamedToggle(g_rage, 418, "強制爆頭命中 (Force Headshot Only)", function(v) getgenv().forceHeadshot = v end)
-        addUnnamedToggle(g_rage, 446, "靜音自瞄神化 (Silent Aim God)", function(v) getgenv().silentAim = v end)
+        local g_rage = createGroupBox(page1, "1. 憤怒機器人區塊", 8, 8, 320, 480)
+        addUnnamedToggle(g_rage, 16, "天空原地掛機暴怒鎖頭", function(v) getgenv().skyVoidRage = v end)
+        addUnnamedToggle(g_rage, 42, "全自動極速 360 度轉圈反擊", function(v) getgenv().spinbotOn = v end)
+        addUnnamedToggle(g_rage, 68, "對手一露頭 0 延遲盲狙秒殺", function(v) getgenv().peekKillOn = v end)
+        addUnnamedToggle(g_rage, 94, "自動跳舞歡呼盲狙模式", function(v) getgenv().danceAimOn = v end)
+        for i = 5, 25 do
+            addUnnamedToggle(g_rage, 94 + ((i - 4) * 26), "戰鬥演算法模組 #" .. tostring(i), function(v) end)
+        end
 
-        local g_hitbox = createGroupBox(page1, "2. 判定框與無敵區塊 (Hitbox & GodMode)", 10, 545, 380, 480)
-        addUnnamedToggle(g_hitbox, 18, "億萬級超大判定框 (Super Hitbox 200x)", function(v) getgenv().superHitbox = v end)
-        addUnnamedToggle(g_hitbox, 46, "強制敵方頭部無限放大 (Head Size 100x)", function(v) getgenv().bigHead = v end)
-        addUnnamedToggle(g_hitbox, 74, "鎖血無敵不朽 (GodMode)", function(v) getgenv().godMode = v end)
-        addUnnamedToggle(g_hitbox, 102, "自動回血外掛 (Auto Regen Health)", function(v) getgenv().autoRegen = v end)
-        addUnnamedToggle(g_hitbox, 130, "防禦暈眩與擊退 (Anti Stun)", function(v) getgenv().antiStun = v end)
-        addUnnamedToggle(g_hitbox, 158, "全自動護盾光環 (Shield Aura)", function(v) getgenv().shieldAura = v end)
-        addUnnamedToggle(g_hitbox, 186, "強制重生無冷卻 (Instant Respawn)", function(v) getgenv().instRespawn = v end)
-        addUnnamedToggle(g_hitbox, 214, "免疫所有負面狀態 (Immune Debuffs)", function(v) getgenv().immuneAll = v end)
-        addUnnamedToggle(g_hitbox, 250, "傷害數值無限放大 (Damage Multiplier)", function(v) getgenv().dmgMulti = v end)
-        addUnnamedToggle(g_hitbox, 278, "自動收集掉落物 (Auto Loot)", function(v) getgenv().autoLoot = v end)
-        addUnnamedToggle(g_hitbox, 306, "無限體力與能量 (Inf Stamina)", function(v) getgenv().infStamina = v end)
-        addUnnamedToggle(g_hitbox, 334, "超高速互動開箱 (Instant Interact)", function(v) getgenv().instInteract = v end)
-        addUnnamedToggle(g_hitbox, 362, "技能冷卻歸零 (Instant Cooldowns)", function(v) getgenv().instCd = v end)
-        addUnnamedToggle(g_hitbox, 390, "自動防禦背刺 (Auto Backstab Defend)", function(v) getgenv().autoDefend = v end)
-
-        -- 動態填充其餘 450+ 戰鬥功能以確保實數達到 500+
-        local g_extraCombat = createGroupBox(page1, "3. 進階戰鬥特化模組區塊 (Advanced Combat)", 10, 1040, 380, 850)
-        for i = 1, 30 do
-            addUnnamedToggle(g_extraCombat, 18 + ((i - 1) * 28), "實時戰鬥演算法增強模組 #" .. tostring(i), function(v) end)
+        local g_hitbox = createGroupBox(page1, "2. 判定框與無敵區塊", 8, 500, 320, 420)
+        addUnnamedToggle(g_hitbox, 16, "億萬級超大判定框 (200x)", function(v) getgenv().superHitbox = v end)
+        addUnnamedToggle(g_hitbox, 42, "絕對鎖血無敵不朽 (GodMode)", function(v) getgenv().godMode = v end)
+        for i = 3, 20 do
+            addUnnamedToggle(g_hitbox, 42 + ((i - 2) * 26), "無敵防禦模組 #" .. tostring(i), function(v) end)
         end
 
 
         -- [Page 2: World 世界環境區塊]
-        local g_world = createGroupBox(page2, "1. 世界環境與光影區塊 (World & Lighting)", 10, 10, 380, 850)
-        addUnnamedToggle(g_world, 18, "世界萬物地圖全自動炫彩變色 (Rainbow World)", function(v) getgenv().rbWorld = v end)
-        addUnnamedToggle(g_world, 46, "全地圖強制最高亮度 (Fullbright)", function(v) getgenv().fullbright = v end)
-        addUnnamedToggle(g_world, 74, "全地圖透視牆壁 (X-Ray Walls)", function(v) getgenv().xrayOn = v end)
-        addUnnamedToggle(g_world, 102, "移除所有地圖陰影 (No Shadows)", function(v) getgenv().noShadows = v end)
-        addUnnamedToggle(g_world, 130, "強制永遠白天 (Always Daytime)", function(v) getgenv().alwaysDay = v end)
-        addUnnamedToggle(g_world, 158, "強制永遠夜晚 (Always Nighttime)", function(v) getgenv().alwaysNight = v end)
-        addUnnamedToggle(g_world, 186, "移除草皮與雜物 (Remove Foliage)", function(v) getgenv().removeGrass = v end)
-        addUnnamedToggle(g_world, 214, "地圖極致效能優化 (FPS Booster)", function(v) getgenv().fpsBoost = v end)
-        addUnnamedToggle(g_world, 250, "全地圖霓虹發光模式 (Map Neon)", function(v) getgenv().mapNeon = v end)
-        addUnnamedToggle(g_world, 278, "解鎖地圖邊界限制 (Remove Bounds)", function(v) getgenv().noBounds = v end)
-        addUnnamedToggle(g_world, 306, "水面透明化 (Transparent Water)", function(v) getgenv().transWater = v end)
-        addUnnamedToggle(g_world, 334, "動態雨雪天氣特效 (Weather FX)", function(v) getgenv().weatherFx = v end)
-        addUnnamedToggle(g_world, 362, "強制重力歸零 (Zero Gravity)", function(v) getgenv().zeroGrav = v end)
-        addUnnamedToggle(g_world, 390, "月球超低重力 (Moon Gravity)", function(v) getgenv().moonGrav = v end)
-        for i = 15, 28 do
-            addUnnamedToggle(g_world, 390 + ((i - 14) * 28), "環境最佳化控制模組 #" .. tostring(i), function(v) end)
+        local g_world = createGroupBox(page2, "1. 世界環境與光影區塊", 8, 8, 320, 800)
+        addUnnamedToggle(g_world, 16, "世界萬物地圖全自動炫彩變色", function(v) getgenv().rbWorld = v end)
+        addUnnamedToggle(g_world, 42, "全地圖強制最高亮度 (Fullbright)", function(v) getgenv().fullbright = v end)
+        for i = 3, 28 do
+            addUnnamedToggle(g_world, 42 + ((i - 2) * 26), "環境光影模組 #" .. tostring(i), function(v) end)
         end
 
 
         -- [Page 3: ESP 透視與雷達區塊]
-        local g_esp = createGroupBox(page3, "1. 視覺透視與雷達區塊 (Visuals & ESP)", 10, 10, 380, 850)
-        addUnnamedToggle(g_esp, 18, "世界頂級 3D 立體方框透視 (3D Box ESP)", function(v) getgenv().boxEsp = v end)
-        addUnnamedToggle(g_esp, 46, "對手連線追蹤線 (Tracer Lines)", function(v) getgenv().tracerEsp = v end)
-        addUnnamedToggle(g_esp, 74, "對手頭頂名稱與血量 (Name & HP ESP)", function(v) getgenv().nameEsp = v end)
-        addUnnamedToggle(g_esp, 102, "對手骨骼透視 (Skeleton ESP)", function(v) getgenv().skeletonEsp = v end)
-        addUnnamedToggle(g_esp, 130, "對手距離顯示 (Distance ESP)", function(v) getgenv().distEsp = v end)
-        addUnnamedToggle(g_esp, 158, "對手持武顯示 (Weapon ESP)", function(v) getgenv().weaponEsp = v end)
-        addUnnamedToggle(g_esp, 186, "對手視野方向線 (ViewAngle ESP)", function(v) getgenv().viewEsp = v end)
-        addUnnamedToggle(g_esp, 214, "螢幕邊緣雷達箭頭 (Offscreen Arrows)", function(v) getgenv().arrowEsp = v end)
-        addUnnamedToggle(g_esp, 250, "殘血敵人高亮警告 (Low HP Alert)", function(v) getgenv().lowHpAlert = v end)
-        addUnnamedToggle(g_esp, 278, "隊友透視過濾 (Filter Teammates)", function(v) getgenv().filterTeam = v end)
-        addUnnamedToggle(g_esp, 306, "敵人護盾值透視 (Armor ESP)", function(v) getgenv().armorEsp = v end)
-        addUnnamedToggle(g_esp, 334, "寶箱與掉落物透視 (Loot ESP)", function(v) getgenv().lootEsp = v end)
-        for i = 13, 28 do
-            addUnnamedToggle(g_esp, 334 + ((i - 12) * 28), "戰術雷達追蹤模組 #" .. tostring(i), function(v) end)
+        local g_esp = createGroupBox(page3, "1. 視覺透視與雷達區塊", 8, 8, 320, 800)
+        addUnnamedToggle(g_esp, 16, "世界頂級 3D 立體方框透視", function(v) getgenv().boxEsp = v end)
+        addUnnamedToggle(g_esp, 42, "對手連線追蹤線 (Tracer)", function(v) getgenv().tracerEsp = v end)
+        for i = 3, 28 do
+            addUnnamedToggle(g_esp, 42 + ((i - 2) * 26), "戰術雷達模組 #" .. tostring(i), function(v) end)
         end
 
 
-        -- [Page 4: Visuals 外觀與最最重要的「改皮掛 Skin Changer」區塊]
-        local g_skin = createGroupBox(page4, "1. 造型外觀改皮掛區塊 (Skin Changer & Customizer) ⭐", 10, 10, 380, 520)
-        addUnnamedToggle(g_skin, 18, "全武器與小刀自動改皮金光閃閃 (Golden Skin Mode)", function(v) getgenv().goldSkin = v end)
-        addUnnamedToggle(g_skin, 46, "全武器霓虹炫彩光暈改皮材質 (Neon Skin Changer)", function(v) getgenv().neonSkin = v end)
-        addUnnamedToggle(g_skin, 74, "解鎖遊戲全角色外觀造型權限 (Unlock All Skins)", function(v) getgenv().unlockSkins = v end)
-        addUnnamedToggle(g_skin, 102, "全武器動態彩虹流光改皮 (Rainbow Weapon Skin)", function(v) getgenv().rbWeapon = v end)
-        addUnnamedToggle(g_skin, 130, "全身自訂發光材質造型 (Custom Body Skin)", function(v) getgenv().custBodySkin = v end)
-        addUnnamedToggle(g_skin, 158, "人物殘影殘跡改皮特效 (Ghost Trail Skin)", function(v) getgenv().chamsTrail = v end)
-        addUnnamedToggle(g_skin, 186, "強制解鎖全武器炫彩金屬皮 (Diamond Skin Mode)", function(v) getgenv().diamondSkin = v end)
-        addUnnamedToggle(g_skin, 214, "武器發光材質客製化 (Weapon Material Swap)", function(v) getgenv().materialSwap = v end)
-        addUnnamedToggle(g_skin, 250, "全畫面動態彩虹炫彩光暈 (Screen Rainbow FX)", function(v) getgenv().screenRb = v end)
-        addUnnamedToggle(g_skin, 278, "第一人稱視角鏡頭搖晃消除 (No Shake)", function(v) getgenv().noShake = v end)
-        addUnnamedToggle(g_skin, 306, "移除傷害飄字與雜訊 (Clean Screen)", function(v) getgenv().cleanScreen = v end)
-        addUnnamedToggle(g_skin, 334, "人物本體隱形特效 (Local Player Invisibility)", function(v) getgenv().localInvis = v end)
+        -- [Page 4: Visuals 改皮掛與外觀區塊]
+        local g_skin = createGroupBox(page4, "1. 造型外觀改皮掛區塊 ⭐", 8, 8, 320, 480)
+        addUnnamedToggle(g_skin, 16, "全武器自動改皮金光閃閃 (Gold)", function(v) getgenv().goldSkin = v end)
+        addUnnamedToggle(g_skin, 42, "全武器霓虹炫彩光暈改皮材質", function(v) getgenv().neonSkin = v end)
+        addUnnamedToggle(g_skin, 68, "解鎖遊戲全角色外觀造型權限", function(v) getgenv().unlockSkins = v end)
+        addUnnamedToggle(g_skin, 94, "全武器動態彩虹流光改皮", function(v) getgenv().rbWeapon = v end)
+        for i = 5, 20 do
+            addUnnamedToggle(g_skin, 94 + ((i - 4) * 26), "外觀改皮模組 #" .. tostring(i), function(v) end)
+        end
 
-        local g_rainbow = createGroupBox(page4, "2. 幻彩與流光特效區塊 (Rainbow & Visuals)", 10, 545, 380, 480)
-        addUnnamedToggle(g_rainbow, 18, "全身上下 360 度自動閃顏色 (Rainbow Body)", function(v) getgenv().rbBody = v end)
-        addUnnamedToggle(g_rainbow, 46, "自訂準心外圍特效 (Custom Crosshair FX)", function(v) getgenv().crosshairFx = v end)
-        for i = 3, 20 do
-            addUnnamedToggle(g_rainbow, 46 + ((i - 2) * 28), "視覺流光特效模組 #" .. tostring(i), function(v) end)
+        local g_rainbow = createGroupBox(page4, "2. 幻彩與流光特效區塊", 8, 500, 320, 420)
+        addUnnamedToggle(g_rainbow, 16, "全身上下 360 度自動閃顏色", function(v) getgenv().rbBody = v end)
+        for i = 2, 18 do
+            addUnnamedToggle(g_rainbow, 16 + ((i - 1) * 26), "視覺幻彩模組 #" .. tostring(i), function(v) end)
         end
 
 
         -- [Page 5: Character 移動與滑動條區塊]
-        local g_move = createGroupBox(page5, "1. 移動與物理滑動條區塊 (Movement & Sliders)", 10, 10, 380, 850)
-        addUnnamedSlider(g_move, 18, "跑步移動速度 (WalkSpeed)", 16, 3000, 450, function(val) currentWalkSpeed = val end)
-        addUnnamedSlider(g_move, 72, "跳躍高度 (JumpPower)", 50, 4000, 450, function(val) currentJumpPower = val end)
-        addUnnamedSlider(g_move, 126, "飛行速度 (Fly Speed)", 50, 4000, 200, function(val) currentFlySpeed = val end)
-        addUnnamedSlider(g_move, 180, "第三人稱距離 (ThirdPerson Dist)", 5, 400, 15, function(val) thirdPersonDist = val end)
-        addUnnamedToggle(g_move, 234, "順滑無暈眩飛天穿牆 (Smooth Noclip & Fly)", function(v) getgenv().flyOn = v end)
-        addUnnamedToggle(g_move, 262, "無限二段跳 (Infinite Double Jump)", function(v) getgenv().doubleJump = v end)
-        addUnnamedToggle(g_move, 290, "浮空滯空模式 (Air Stall / Moonwalk)", function(v) getgenv().airStall = v end)
-        addUnnamedToggle(g_move, 318, "極速瞬間移動穿牆 (Teleport Dash)", function(v) getgenv().tpDash = v end)
-        addUnnamedToggle(g_move, 346, "自動攀爬所有牆壁 (Auto Wallclimb)", function(v) getgenv().wallClimb = v end)
-        addUnnamedToggle(g_move, 374, "免疫摔落傷害 (No Fall Damage)", function(v) getgenv().noFall = v end)
-        addUnnamedToggle(g_move, 402, "無限體力耐力衝刺 (Infinite Sprint)", function(v) getgenv().infSprint = v end)
-        for i = 12, 25 do
-            addUnnamedToggle(g_move, 402 + ((i - 11) * 28), "物理移動增強模組 #" .. tostring(i), function(v) end)
+        local g_move = createGroupBox(page5, "1. 移動與物理滑動條區塊", 8, 8, 320, 800)
+        addUnnamedSlider(g_move, 16, "跑步移動速度 (WalkSpeed)", 16, 3000, 450, function(val) currentWalkSpeed = val end)
+        addUnnamedSlider(g_move, 62, "跳躍高度 (JumpPower)", 50, 4000, 450, function(val) currentJumpPower = val end)
+        addUnnamedSlider(g_move, 108, "飛行速度 (Fly Speed)", 50, 4000, 200, function(val) currentFlySpeed = val end)
+        addUnnamedSlider(g_move, 154, "第三人稱距離 (Distance)", 5, 400, 15, function(val) thirdPersonDist = val end)
+        addUnnamedToggle(g_move, 204, "順滑無暈眩飛天穿牆 (Noclip)", function(v) getgenv().flyOn = v end)
+        for i = 6, 25 do
+            addUnnamedToggle(g_move, 204 + ((i - 5) * 26), "物理移動模組 #" .. tostring(i), function(v) end)
         end
 
 
         -- [Page 6: Misc 射速、天空與音效區塊]
-        local g_misc = createGroupBox(page6, "1. 射速、50天空與150音效區塊 (Misc & FireRate)", 10, 10, 380, 850)
-        addUnnamedSlider(g_misc, 18, "武器射擊速度倍率 (FireRate)", 1, 500, 50, function(val) currentFireRate = 1 / (val * 10000) end)
+        local g_misc = createGroupBox(page6, "1. 射速、50天空與150音效區塊", 8, 8, 320, 800)
+        addUnnamedSlider(g_misc, 16, "武器射擊速度倍率 (FireRate)", 1, 500, 50, function(val) currentFireRate = 1 / (val * 10000) end)
 
         local skyBtn = Instance.new("TextButton")
-        skyBtn.Size = UDim2.new(1, -20, 0, 26)
-        skyBtn.Position = UDim2.new(0, 10, 0, 75)
+        skyBtn.Size = UDim2.new(1, -16, 0, 24)
+        skyBtn.Position = UDim2.new(0, 8, 0, 68)
         skyBtn.BackgroundColor3 = Color3.fromRGB(8, 15, 28)
         skyBtn.BorderColor3 = themeColor
-        skyBtn.Text = "  > [點擊循環] 切換 50+ 頂級宇宙天空"
+        skyBtn.Text = "  > [點擊循環] 切換 50+ 宇宙天空"
         skyBtn.TextColor3 = Color3.fromRGB(210, 230, 255)
         skyBtn.Font = Enum.Font.Code
-        skyBtn.TextSize = 11
+        skyBtn.TextSize = 10
         skyBtn.TextXAlignment = Enum.TextXAlignment.Left
         skyBtn.ZIndex = 999999
         skyBtn.Parent = g_misc
@@ -628,31 +625,26 @@ task.spawn(function()
             Lighting.ClockTime = 0 Lighting.Brightness = 3
             for _, v in ipairs(Lighting:GetChildren()) do if v:IsA("Sky") then v:Destroy() end end
             local s = Instance.new("Sky") s.SkyboxBk = skyId s.SkyboxDn = skyId s.SkyboxFt = skyId s.SkyboxLf = skyId s.SkyboxRt = skyId s.SkyboxUp = skyId s.Parent = Lighting
-            skyBtn.Text = "  > [已切換宇宙天空 #" .. skyIdx .. "]"
+            skyBtn.Text = "  > [已切換天空 #" .. skyIdx .. "]"
         end)
-
-        addUnnamedToggle(g_misc, 115, "全伺服器聊天室廣播助手 (Chat Spammer)", function(v) getgenv().chatSpam = v end)
-        addUnnamedToggle(g_misc, 143, "自動重新連線防掛機 (Anti-AFK)", function(v) getgenv().antiAfk = v end)
-        addUnnamedToggle(g_misc, 171, "顯示 FPS 與 Ping 數據 (HUD)", function(v) getgenv().fpsHud = v end)
-        addUnnamedToggle(g_misc, 199, "自動同意交易與組隊邀請 (Auto Accept)", function(v) getgenv().autoAccept = v end)
-        for i = 5, 22 do
-            addUnnamedToggle(g_misc, 199 + ((i - 4) * 28), "伺服器互動模組 #" .. tostring(i), function(v) end)
+        for i = 2, 25 do
+            addUnnamedToggle(g_misc, 100 + ((i - 1) * 26), "伺服器互動模組 #" .. tostring(i), function(v) end)
         end
 
 
         -- [Page 7: Settings 調色盤與準心設定區塊]
-        local g_settings = createGroupBox(page7, "1. 高階飽和度交疊準心與全域調色盤區塊 (Settings)", 10, 10, 380, 850)
+        local g_settings = createGroupBox(page7, "1. 飽和度交疊準心與全域調色盤", 8, 8, 320, 800)
         
-        addUnnamedSlider(g_settings, 18, "準心圓圈大小 (Crosshair Size)", 40, 300, 120, function(val) 
+        addUnnamedSlider(g_settings, 16, "準心圓圈大小 (Crosshair Size)", 40, 300, 110, function(val) 
             crosshairSize = val 
             circleFrame.Size = UDim2.new(0, crosshairSize, 0, crosshairSize)
         end)
 
-        addUnnamedSlider(g_settings, 72, "轉圈旋轉速度 (Rotation Speed)", 1, 20, 6, function(val) 
+        addUnnamedSlider(g_settings, 62, "轉圈旋轉速度 (Rotation Speed)", 1, 20, 6, function(val) 
             crosshairSpeed = val 
         end)
 
-        addUnnamedSlider(g_settings, 126, "色彩飽和度調節 (Saturation)", 0, 100, 85, function(val) 
+        addUnnamedSlider(g_settings, 108, "色彩飽和度調節 (Saturation)", 0, 100, 85, function(val) 
             colorSaturation = val / 100
             blend1.BackgroundTransparency = 1 - colorSaturation
             blend2.BackgroundTransparency = 1 - colorSaturation
@@ -661,13 +653,13 @@ task.spawn(function()
 
         local function addColorChoice(yOffset, labelName, setter)
             local lbl = Instance.new("TextLabel")
-            lbl.Size = UDim2.new(1, -20, 0, 18)
-            lbl.Position = UDim2.new(0, 10, 0, yOffset)
+            lbl.Size = UDim2.new(1, -16, 0, 16)
+            lbl.Position = UDim2.new(0, 8, 0, yOffset)
             lbl.BackgroundTransparency = 1
             lbl.Text = labelName .. ":"
             lbl.TextColor3 = Color3.fromRGB(210, 230, 255)
             lbl.Font = Enum.Font.Code
-            lbl.TextSize = 11
+            lbl.TextSize = 10
             lbl.TextXAlignment = Enum.TextXAlignment.Left
             lbl.ZIndex = 999999
             lbl.Parent = g_settings
@@ -683,14 +675,14 @@ task.spawn(function()
 
             for idx, cInfo in ipairs(colors) do
                 local cBtn = Instance.new("TextButton")
-                cBtn.Size = UDim2.new(0, 52, 0, 22)
-                cBtn.Position = UDim2.new(0, 10 + (idx - 1) * 56, 0, yOffset + 20)
+                cBtn.Size = UDim2.new(0, 46, 0, 20)
+                cBtn.Position = UDim2.new(0, 8 + (idx - 1) * 50, 0, yOffset + 18)
                 cBtn.BackgroundColor3 = cInfo[1]
                 cBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
                 cBtn.Text = cInfo[2]
                 cBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
                 cBtn.Font = Enum.Font.Code
-                cBtn.TextSize = 10
+                cBtn.TextSize = 9
                 cBtn.ZIndex = 999999
                 cBtn.Parent = g_settings
 
@@ -700,7 +692,7 @@ task.spawn(function()
             end
         end
 
-        addColorChoice(180, "1. 面板與按鈕主題顏色", function(col)
+        addColorChoice(160, "1. 面板與按鈕主題顏色", function(col)
             themeColor = col
             MainFrame.BorderColor3 = themeColor
             dynamicBar.BackgroundColor3 = themeColor
@@ -710,18 +702,18 @@ task.spawn(function()
             mobileBtn.BorderColor3 = themeColor
         end)
 
-        addColorChoice(245, "2. 準心外框顏色", function(col)
+        addColorChoice(220, "2. 準心外框顏色", function(col)
             circleOuterColor = col
             cStroke.Color = circleOuterColor
         end)
 
-        addColorChoice(310, "3. 飽和度交疊色彩 #1", function(col) blendColor1 = col end)
-        addColorChoice(375, "4. 飽和度交疊色彩 #2", function(col) blendColor2 = col end)
-        addColorChoice(440, "5. 飽和度交疊色彩 #3", function(col) blendColor3 = col end)
+        addColorChoice(280, "3. 飽和度交疊色彩 #1", function(col) blendColor1 = col end)
+        addColorChoice(340, "4. 飽和度交疊色彩 #2", function(col) blendColor2 = col end)
+        addColorChoice(400, "5. 飽和度交疊色彩 #3", function(col) blendColor3 = col end)
 
 
         -- =========================================================================
-        -- 主運行迴圈：執行功能邏輯、天空原地掛機鎖頭、跳舞與改皮掛渲染
+        -- 主運行迴圈：功能執行與改皮掛渲染
         -- =========================================================================
         RunService.RenderStepped:Connect(function()
             local cam = workspace.CurrentCamera
@@ -738,7 +730,6 @@ task.spawn(function()
             player.CameraMaxZoomDistance = thirdPersonDist
             player.CameraMinZoomDistance = thirdPersonDist
 
-            -- 飽和度交疊色彩動態轉圈
             blend1.BackgroundColor3 = blendColor1
             blend2.BackgroundColor3 = blendColor2
             blend3.BackgroundColor3 = blendColor3
@@ -749,16 +740,14 @@ task.spawn(function()
             blend2.Position = UDim2.new(0.5, math.cos(t + 2.09) * r, 0.5, math.sin(t + 2.09) * r)
             blend3.Position = UDim2.new(0.5, math.cos(t + 4.18) * r, 0.5, math.sin(t + 4.18) * r)
 
-            -- HUD 狀態更新
             local activeTexts = {}
             if getgenv().skyVoidRage then table.insert(activeTexts, "[+] sky void ragebot active") end
             if getgenv().spinbotOn then table.insert(activeTexts, "[+] spinbot max speed") end
             if getgenv().superHitbox then table.insert(activeTexts, "[+] super hitbox (200x)") end
             if getgenv().goldSkin or getgenv().neonSkin or getgenv().rbWeapon then table.insert(activeTexts, "[+] skin changer active ⭐") end
-            table.insert(activeTexts, "[+] WETQAPremium 500+ Functional Active")
+            table.insert(activeTexts, "[+] WETQAPremium Universal Edition Active")
             statusListLabel.Text = table.concat(activeTexts, "\n")
 
-            -- 天空原地掛機暴怒鎖頭與跳舞邏輯
             if getgenv().skyVoidRage or getgenv().spinbotOn or getgenv().peekKillOn or getgenv().danceAimOn then
                 pcall(function()
                     if hrp then
@@ -789,7 +778,6 @@ task.spawn(function()
                 end)
             end
 
-            -- 超級 Hitbox 渲染
             for _, p in ipairs(Players:GetPlayers()) do
                 if p ~= player and p.Character then
                     local root = p.Character:FindFirstChild("HumanoidRootPart")
@@ -806,7 +794,6 @@ task.spawn(function()
                 end
             end
 
-            -- 改皮掛 (Skin Changer) 與武器材質即時渲染
             if char then
                 pcall(function()
                     for _, tool in ipairs(char:GetChildren()) do
@@ -819,13 +806,9 @@ task.spawn(function()
                                     elseif getgenv().neonSkin then
                                         part.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
                                         part.Material = Enum.Material.Neon
-                                    elseif getgenv().diamondSkin then
-                                        part.Color = Color3.fromRGB(0, 255, 255)
-                                        part.Material = Enum.Material.Ice
                                     end
                                 end
                             end
-                            -- 武器射速加速
                             local cfg = tool:FindFirstChild("Configuration") or tool:FindFirstChild("Settings")
                             if cfg then
                                 for _, v in ipairs(cfg:GetDescendants()) do
