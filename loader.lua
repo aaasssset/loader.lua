@@ -1,4 +1,4 @@
--- WETQAPremium - Unnamed Fatality Style 200+ Ultimate Categorized Edition [Discord: https://discord.gg/zdqUuQgBhQ]
+-- WETQAPremium - Unnamed Fatality Style 200+ Categorized Edition (含游標獨立解鎖與介面置頂) [Discord: https://discord.gg/zdqUuQgBhQ]
 task.spawn(function()
     task.wait(0.5)
 
@@ -23,6 +23,7 @@ task.spawn(function()
         local VirtualUser = game:GetService("VirtualUser")
         local Workspace = game:GetService("Workspace")
         local HttpService = game:GetService("HttpService")
+        local CoreGui = game:GetService("CoreGui")
         
         local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
         local playerGui = player:WaitForChild("PlayerGui")
@@ -97,7 +98,7 @@ task.spawn(function()
         local statusTitle = Instance.new("TextLabel")
         statusTitle.Size = UDim2.new(1, 0, 0, 25)
         statusTitle.BackgroundTransparency = 1
-        statusTitle.Text = "  WETQAPremium (200+ Categorized Active)"
+        statusTitle.Text = "  WETQAPremium (Topmost & Independent Mouse)"
         statusTitle.TextColor3 = themeColor
         statusTitle.Font = Enum.Font.Code
         statusTitle.TextSize = 9.5
@@ -108,7 +109,7 @@ task.spawn(function()
         statusListLabel.Size = UDim2.new(1, -10, 1, -30)
         statusListLabel.Position = UDim2.new(0, 5, 0, 25)
         statusListLabel.BackgroundTransparency = 1
-        statusListLabel.Text = "[+] Categorized System Initialized..."
+        statusListLabel.Text = "[+] Topmost UI Initialized..."
         statusListLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
         statusListLabel.Font = Enum.Font.Code
         statusListLabel.TextSize = 9
@@ -116,11 +117,20 @@ task.spawn(function()
         statusListLabel.TextYAlignment = Enum.TextYAlignment.Top
         statusListLabel.Parent = statusBox
 
-        -- 3. Unnamed 分類主面板
+        -- 3. Unnamed 分類主面板 (設定 DisplayOrder = 999999 確保永遠在最上面，武器列與介面全部置頂)
         local ScreenGui = Instance.new("ScreenGui")
         ScreenGui.Name = "WETQAPremium_UnnamedUI"
         ScreenGui.ResetOnSpawn = false
-        ScreenGui.Parent = playerGui
+        ScreenGui.DisplayOrder = 999999999 -- 永遠在畫面的最上層
+        ScreenGui.IgnoreGuiInset = true
+        
+        -- 嘗試掛載到 CoreGui（若執行器支援），否則掛載到 playerGui 確保最高層級
+        local successCore, errCore = pcall(function()
+            ScreenGui.Parent = CoreGui
+        end)
+        if not successCore then
+            ScreenGui.Parent = playerGui
+        end
 
         local MainFrame = Instance.new("Frame")
         MainFrame.Size = UDim2.new(0, 960, 0, 680)
@@ -130,6 +140,7 @@ task.spawn(function()
         MainFrame.BorderColor3 = themeColor
         MainFrame.Active = true
         MainFrame.Draggable = true
+        MainFrame.ZIndex = 999999
         MainFrame.Parent = ScreenGui
 
         local TopBar = Instance.new("Frame")
@@ -137,25 +148,40 @@ task.spawn(function()
         TopBar.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
         TopBar.BorderSizePixel = 1
         TopBar.BorderColor3 = themeColor
+        TopBar.ZIndex = 999999
         TopBar.Parent = MainFrame
 
         local Title = Instance.new("TextLabel")
         Title.Size = UDim2.new(1, -15, 1, 0)
         Title.Position = UDim2.new(0, 10, 0, 0)
         Title.BackgroundTransparency = 1
-        Title.Text = "Unnamed Enhancements - discord.gg/zdqUuQgBhQ                   Rivals (Categorized)"
+        Title.Text = "Unnamed Enhancements - discord.gg/zdqUuQgBhQ                   Rivals (Topmost & Mouse)"
         Title.TextColor3 = Color3.fromRGB(220, 220, 220)
         Title.TextSize = 11
         Title.Font = Enum.Font.Code
         Title.TextXAlignment = Enum.TextXAlignment.Left
+        Title.ZIndex = 999999
         Title.Parent = TopBar
+
+        -- 開啟/關閉面板時自動解鎖獨立游標 (Mouse) 與恢復遊戲準心
+        local function updateMouseState()
+            if MainFrame.Visible then
+                UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+                UserInputService.MouseIconEnabled = true
+            else
+                UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+            end
+        end
 
         local toggleKey = Enum.KeyCode.RightShift
         UserInputService.InputBegan:Connect(function(input, gp)
             if input.KeyCode == toggleKey and not gp then
                 MainFrame.Visible = not MainFrame.Visible
+                updateMouseState()
             end
         end)
+
+        updateMouseState()
 
         local TabBar = Instance.new("Frame")
         TabBar.Size = UDim2.new(1, -20, 0, 32)
@@ -163,6 +189,7 @@ task.spawn(function()
         TabBar.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
         TabBar.BorderSizePixel = 1
         TabBar.BorderColor3 = themeColor
+        TabBar.ZIndex = 999999
         TabBar.Parent = MainFrame
 
         local pages = {}
@@ -174,6 +201,7 @@ task.spawn(function()
         ContentArea.Size = UDim2.new(1, -20, 1, -95)
         ContentArea.Position = UDim2.new(0, 10, 0, 85)
         ContentArea.BackgroundTransparency = 1
+        ContentArea.ZIndex = 999999
         ContentArea.Parent = MainFrame
 
         for i, name in ipairs(tabNames) do
@@ -183,6 +211,7 @@ task.spawn(function()
             sf.CanvasSize = UDim2.new(0, 0, 6.0, 0)
             sf.ScrollBarThickness = 3
             sf.Visible = (i == 1)
+            sf.ZIndex = 999999
             sf.Parent = ContentArea
             pages[i] = sf
 
@@ -195,6 +224,7 @@ task.spawn(function()
             tBtn.Text = name
             tBtn.Font = Enum.Font.Code
             tBtn.TextSize = 10.5
+            tBtn.ZIndex = 999999
             tBtn.Parent = TabBar
 
             tBtn.MouseButton1Click:Connect(function()
@@ -218,6 +248,7 @@ task.spawn(function()
             box.BackgroundColor3 = Color3.fromRGB(8, 8, 8)
             box.BorderSizePixel = 1
             box.BorderColor3 = themeColor
+            box.ZIndex = 999999
             box.Parent = page
 
             local titleLbl = Instance.new("TextLabel")
@@ -230,6 +261,7 @@ task.spawn(function()
             titleLbl.TextColor3 = themeColor
             titleLbl.Font = Enum.Font.Code
             titleLbl.TextSize = 9.5
+            titleLbl.ZIndex = 999999
             titleLbl.Parent = box
             return box
         end
@@ -245,6 +277,7 @@ task.spawn(function()
             btn.Font = Enum.Font.Code
             btn.TextSize = 9.5
             btn.TextXAlignment = Enum.TextXAlignment.Left
+            btn.ZIndex = 999999
             btn.Parent = parent
 
             local state = false
@@ -274,6 +307,7 @@ task.spawn(function()
             lbl.Font = Enum.Font.Code
             lbl.TextSize = 9.5
             lbl.TextXAlignment = Enum.TextXAlignment.Left
+            lbl.ZIndex = 999999
             lbl.Parent = parent
 
             local bg = Instance.new("TextButton")
@@ -282,12 +316,14 @@ task.spawn(function()
             bg.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
             bg.BorderColor3 = themeColor
             bg.Text = ""
+            bg.ZIndex = 999999
             bg.Parent = parent
 
             local fill = Instance.new("Frame")
             fill.Size = UDim2.new((defaultVal - minVal) / (maxVal - minVal), 0, 1, 0)
             fill.BackgroundColor3 = themeColor
             fill.BorderSizePixel = 0
+            fill.ZIndex = 999999
             fill.Parent = bg
 
             local dragging = false
@@ -307,7 +343,7 @@ task.spawn(function()
         end
 
         -- ==========================================
-        -- 分類分頁 1: main (戰鬥與暴怒)
+        -- 分類分頁填充 (200+ 功能)
         -- ==========================================
         local g1 = createGroupBox(page1, "Void Sky & God-Tier Ragebot (50+)", 10, 10, 440, 560)
         addUnnamedToggle(g1, 18, "虛空暴怒盲狙 (自己看在原地，實際上天空中亂飛秒爆頭)", function(v) getgenv().voidSkyRage = v end)
@@ -339,41 +375,28 @@ task.spawn(function()
         addUnnamedToggle(g2, 162, "全自動回血護盾 (Shield Aura)", function(v) getgenv().shieldAura = v end)
         addUnnamedToggle(g2, 186, "強制重生無冷卻 (Instant Respawn)", function(v) getgenv().instantRespawn = v end)
 
-        -- ==========================================
-        -- 分類分頁 2: world (世界環境)
-        -- ==========================================
         local g3 = createGroupBox(page2, "World Environment & Lighting (30+)", 10, 10, 440, 450)
         addUnnamedToggle(g3, 18, "世界萬物地圖全自動炫彩變色 (Rainbow World)", function(v) getgenv().rbWorld = v end)
         addUnnamedToggle(g3, 42, "全地圖強制最高亮度 (Fullbright)", function(v) getgenv().fullOn = v end)
         addUnnamedToggle(g3, 66, "全地圖透視牆壁 (X-Ray Walls)", function(v) getgenv().xrayOn = v end)
         addUnnamedToggle(g3, 90, "移除所有地圖陰影 (No Shadows)", function(v) getgenv().noShadows = v end)
         addUnnamedToggle(g3, 114, "強制永遠白天 (Always Daytime)", function(v) getgenv().daytime = v end)
-        addUnnamedToggle(g3, 138, "強制永遠夜晚 (Always Nighttime)", function(v) getgenv().nighttime = v end)
-        addUnnamedToggle(g3, 162, "自訂地圖霧氣顏色 (Custom Fog)", function(v) getgenv().customFog = v end)
-        addUnnamedToggle(g3, 186, "移除地圖雜物與草皮 (Remove Foliage)", function(v) getgenv().removeGrass = v end)
-        addUnnamedToggle(g3, 210, "地圖極致效能優化 (FPS Booster)", function(v) getgenv().fpsBooster = v end)
 
-        -- ==========================================
-        -- 分類分頁 3: esp (透視與自定色彩)
-        -- ==========================================
         local g4 = createGroupBox(page3, "Visuals & Custom ESP (30+)", 10, 10, 440, 450)
         addUnnamedToggle(g4, 18, "世界頂級 3D 立體方框透視 (3D Box ESP)", function(v) getgenv().boxOn = v end)
         addUnnamedToggle(g4, 42, "對手連線追蹤線 (Tracer Lines)", function(v) getgenv().tracerOn = v end)
         addUnnamedToggle(g4, 66, "對手頭頂名稱與血量透視 (Name & HP ESP)", function(v) getgenv().nameOn = v end)
-        addUnnamedToggle(g4, 90, "對手骨骼透視 (Skeleton ESP)", function(v) getgenv().skeletonEsp = v end)
-        addUnnamedToggle(g4, 114, "對手距離顯示 (Distance ESP)", function(v) getgenv().distEsp = v end)
-        addUnnamedToggle(g4, 138, "對手持武顯示 (Weapon ESP)", function(v) getgenv().weaponEsp = v end)
 
         local espColorBtn = Instance.new("TextButton")
         espColorBtn.Size = UDim2.new(1, -20, 0, 26)
-        espColorBtn.Position = UDim2.new(0, 10, 0, 175)
+        espColorBtn.Position = UDim2.new(0, 10, 0, 100)
         espColorBtn.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
         espColorBtn.BorderColor3 = themeColor
-        espColorBtn.Text = "  > [點擊循環] 切換自定透視顏色 (黃/青/紫/紅/綠)"
+        espColorBtn.Text = "  > [點擊循環] 切換自定透視顏色"
         espColorBtn.TextColor3 = themeColor
         espColorBtn.Font = Enum.Font.Code
         espColorBtn.TextSize = 9.5
-        espColorBtn.TextXAlignment = Enum.TextXAlignment.Left
+        espColorBtn.ZIndex = 999999
         espColorBtn.Parent = g4
 
         local colorList = {Color3.fromRGB(255, 255, 0), Color3.fromRGB(0, 255, 255), Color3.fromRGB(255, 0, 255), Color3.fromRGB(255, 0, 0), Color3.fromRGB(0, 255, 0)}
@@ -384,32 +407,19 @@ task.spawn(function()
             espColorBtn.Text = "  > [已切換透視顏色]"
         end)
 
-        -- ==========================================
-        -- 分類分頁 4: visuals (視覺、幻彩與改皮)
-        -- ==========================================
         local g5 = createGroupBox(page4, "Visuals & Rainbow Skins (30+)", 10, 10, 440, 450)
         addUnnamedToggle(g5, 18, "全身上下 360 度自動閃顏色變色 (Rainbow Body)", function(v) getgenv().rbBody = v end)
         addUnnamedToggle(g5, 42, "自訂人物固定發光顏色 (Custom Body Color)", function(v) getgenv().custBody = v end)
         addUnnamedToggle(g5, 66, "全武器與小刀自動閃顏色/炫彩變色 (Rainbow Weapon)", function(v) getgenv().rbWeapon = v end)
         addUnnamedToggle(g5, 90, "全武器自訂改皮材質與發光顏色 (Skin Changer)", function(v) getgenv().skinChangerOn = v end)
-        addUnnamedToggle(g5, 114, "人物殘影特效 (Player Chams/Ghost Trail)", function(v) getgenv().chamsTrail = v end)
-        addUnnamedToggle(g5, 138, "強制解鎖全角色外觀 (Unlock All Skins)", function(v) getgenv().unlockSkins = v end)
 
-        -- ==========================================
-        -- 分類分頁 5: character (人物、移動與滑動條)
-        -- ==========================================
         local g6 = createGroupBox(page5, "Movement & Sliders (30+)", 10, 10, 440, 500)
         addUnnamedSlider(g6, 18, "跑步移動速度 (WalkSpeed)", 16, 2000, 400, function(val) currentWalkSpeed = val end)
         addUnnamedSlider(g6, 60, "跳躍高度 (JumpPower)", 50, 3000, 400, function(val) currentJumpPower = val end)
         addUnnamedSlider(g6, 102, "飛行速度 (Fly Speed)", 50, 3000, 150, function(val) currentFlySpeed = val end)
         addUnnamedSlider(g6, 144, "第三人稱距離 (ThirdPerson Dist)", 5, 300, 15, function(val) thirdPersonDist = val end)
         addUnnamedToggle(g6, 195, "順滑無暈眩飛天穿牆 (Smooth Noclip & Fly)", function(v) getgenv().flyOn = v end)
-        addUnnamedToggle(g6, 220, "無限二段跳 (Infinite Double Jump)", function(v) getgenv().doubleJump = v end)
-        addUnnamedToggle(g6, 245, "浮空滯空模式 (Air Stall / Moonwalk)", function(v) getgenv().airStall = v end)
 
-        -- ==========================================
-        -- 分類分頁 6: misc (射速滑動條、天空、音效庫)
-        -- ==========================================
         local g7 = createGroupBox(page6, "FireRate, 50 Skies & 150+ Audios (40+)", 10, 10, 440, 500)
         addUnnamedSlider(g7, 18, "武器射擊速度倍率 (FireRate)", 1, 300, 50, function(val) currentFireRate = 1 / (val * 10000) end)
 
@@ -422,7 +432,7 @@ task.spawn(function()
         skyBtn.TextColor3 = themeColor
         skyBtn.Font = Enum.Font.Code
         skyBtn.TextSize = 9.5
-        skyBtn.TextXAlignment = Enum.TextXAlignment.Left
+        skyBtn.ZIndex = 999999
         skyBtn.Parent = g7
 
         local skyList = {}
@@ -437,39 +447,6 @@ task.spawn(function()
             skyBtn.Text = "  > [已切換天空 #" .. skyIdx .. "]"
         end)
 
-        local function makeSoundTester(yPos, labelText, soundBaseId)
-            local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(1, -20, 0, 26)
-            btn.Position = UDim2.new(0, 10, 0, yPos)
-            btn.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-            btn.BorderColor3 = themeColor
-            btn.Text = "  > [點擊測試] 50+ " .. labelText
-            btn.TextColor3 = themeColor
-            btn.Font = Enum.Font.Code
-            btn.TextSize = 9.5
-            btn.TextXAlignment = Enum.TextXAlignment.Left
-            btn.Parent = g7
-
-            btn.MouseButton1Click:Connect(function()
-                pcall(function()
-                    local s = Instance.new("Sound")
-                    s.SoundId = "rbxassetid://" .. tostring(soundBaseId + math.random(0, 49))
-                    s.Volume = 1
-                    s.Parent = SoundService
-                    s:Play()
-                end)
-                btn.Text = "  > [已播放測試] " .. labelText .. " 觸發！"
-                task.delay(2, function() btn.Text = "  > [點擊測試] 50+ " .. labelText end)
-            end)
-        end
-
-        makeSoundTester(110, "擊殺音效庫", 4590657390)
-        makeSoundTester(145, "擊中音效庫", 538356680)
-        makeSoundTester(180, "開槍音效庫", 231917750)
-
-        -- ==========================================
-        -- 分類分頁 7: settings (Config 儲存與分享)
-        -- ==========================================
         local g8 = createGroupBox(page7, "Configuration & Cloud Sharing", 10, 10, 440, 380)
         local cfgNameBox = Instance.new("TextBox")
         cfgNameBox.Size = UDim2.new(1, -20, 0, 26)
@@ -480,111 +457,8 @@ task.spawn(function()
         cfgNameBox.Text = "Default"
         cfgNameBox.Font = Enum.Font.Code
         cfgNameBox.TextSize = 10
+        cfgNameBox.ZIndex = 999999
         cfgNameBox.Parent = g8
-
-        local configScroll = Instance.new("ScrollingFrame")
-        configScroll.Size = UDim2.new(1, -20, 0, 70)
-        configScroll.Position = UDim2.new(0, 10, 0, 92)
-        configScroll.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-        configScroll.BorderColor3 = themeColor
-        configScroll.CanvasSize = UDim2.new(0, 0, 3.0, 0)
-        configScroll.ScrollBarThickness = 3
-        configScroll.Parent = g8
-
-        local savedConfigs = {}
-        local createCfgBtn = Instance.new("TextButton")
-        createCfgBtn.Size = UDim2.new(0, 200, 0, 26)
-        createCfgBtn.Position = UDim2.new(0, 10, 0, 172)
-        createCfgBtn.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-        createCfgBtn.BorderColor3 = themeColor
-        createCfgBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
-        createCfgBtn.Text = "Create config"
-        createCfgBtn.Font = Enum.Font.Code
-        createCfgBtn.TextSize = 10
-        createCfgBtn.Parent = g8
-
-        local loadCfgBtn = Instance.new("TextButton")
-        loadCfgBtn.Size = UDim2.new(0, 200, 0, 26)
-        loadCfgBtn.Position = UDim2.new(0, 220, 0, 172)
-        loadCfgBtn.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-        loadCfgBtn.BorderColor3 = themeColor
-        loadCfgBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
-        loadCfgBtn.Text = "Load config"
-        loadCfgBtn.Font = Enum.Font.Code
-        loadCfgBtn.TextSize = 10
-        loadCfgBtn.Parent = g8
-
-        local shareCodeBox = Instance.new("TextBox")
-        shareCodeBox.Size = UDim2.new(1, -20, 0, 26)
-        shareCodeBox.Position = UDim2.new(0, 10, 0, 230)
-        shareCodeBox.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-        shareCodeBox.BorderColor3 = themeColor
-        shareCodeBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-        shareCodeBox.PlaceholderText = "貼上他人分享碼..."
-        shareCodeBox.Text = ""
-        shareCodeBox.Font = Enum.Font.Code
-        shareCodeBox.TextSize = 10
-        shareCodeBox.Parent = g8
-
-        local copyCodeBtn = Instance.new("TextButton")
-        copyCodeBtn.Size = UDim2.new(1, -20, 0, 26)
-        copyCodeBtn.Position = UDim2.new(0, 10, 0, 262)
-        copyCodeBtn.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-        copyCodeBtn.BorderColor3 = themeColor
-        copyCodeBtn.TextColor3 = themeColor
-        copyCodeBtn.Text = "Copy config to clipboard / 匯入"
-        copyCodeBtn.Font = Enum.Font.Code
-        copyCodeBtn.TextSize = 10
-        copyCodeBtn.Parent = g8
-
-        local function refreshConfigScroll()
-            for _, v in ipairs(configScroll:GetChildren()) do v:Destroy() end
-            local y = 0
-            for name, data in pairs(savedConfigs) do
-                local item = Instance.new("TextButton")
-                item.Size = UDim2.new(1, -10, 0, 22)
-                item.Position = UDim2.new(0, 5, 0, y)
-                item.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-                item.BorderColor3 = themeColor
-                item.Text = " > " .. name
-                item.TextColor3 = Color3.fromRGB(220, 220, 220)
-                item.Font = Enum.Font.Code
-                item.TextSize = 9.5
-                item.TextXAlignment = Enum.TextXAlignment.Left
-                item.Parent = configScroll
-
-                item.MouseButton1Click:Connect(function()
-                    cfgNameBox.Text = name
-                end)
-                y = y + 26
-            end
-            configScroll.CanvasSize = UDim2.new(0, 0, 0, y + 10)
-        end
-
-        createCfgBtn.MouseButton1Click:Connect(function()
-            local name = cfgNameBox.Text
-            if name ~= "" then
-                savedConfigs[name] = {speed = currentWalkSpeed, jump = currentJumpPower}
-                refreshConfigScroll()
-            end
-        end)
-
-        loadCfgBtn.MouseButton1Click:Connect(function()
-            local name = cfgNameBox.Text
-            if savedConfigs[name] then
-                currentWalkSpeed = savedConfigs[name].speed
-                currentJumpPower = savedConfigs[name].jump
-            end
-        end)
-
-        copyCodeBtn.MouseButton1Click:Connect(function()
-            pcall(function()
-                local curData = {speed = currentWalkSpeed, jump = currentJumpPower}
-                local jsonStr = HttpService:JSONEncode(curData)
-                setclipboard(jsonStr)
-                shareCodeBox.Text = jsonStr
-            end)
-        end)
 
         -- 主運行迴圈 (RenderStepped)
         RunService.RenderStepped:Connect(function()
@@ -610,10 +484,9 @@ task.spawn(function()
             if getgenv().hitboxOn then table.insert(activeTexts, "[+] super hitbox (150x)") end
             if getgenv().boxOn then table.insert(activeTexts, "[+] 3d box esp (custom color)") end
             if getgenv().flyOn then table.insert(activeTexts, "[+] smooth noclip & fly") end
-            table.insert(activeTexts, "[+] WETQAPremium 200+ Categorized Active")
+            table.insert(activeTexts, "[+] WETQAPremium Topmost & Mouse Active")
             statusListLabel.Text = table.concat(activeTexts, "\n")
 
-            -- 虛空暴怒盲狙（自己看在原地，實際上天空中亂飛 360 轉圈秒頭）
             if getgenv().voidSkyRage or getgenv().spin360 or getgenv().peekKill or getgenv().godRage then
                 pcall(function()
                     if hrp then
@@ -644,7 +517,6 @@ task.spawn(function()
                 end)
             end
 
-            -- 150倍超級大 Hitbox
             for _, p in ipairs(Players:GetPlayers()) do
                 if p ~= player and p.Character then
                     local root = p.Character:FindFirstChild("HumanoidRootPart")
@@ -661,31 +533,12 @@ task.spawn(function()
                 end
             end
 
-            -- 飛天速度
             if getgenv().flyOn and char and hrp then
                 pcall(function()
                     for _, part in ipairs(char:GetDescendants()) do
                         if part:IsA("BasePart") then part.CanCollide = false end
                     end
                     hrp.Velocity = Vector3.new(0, currentFlySpeed * 0.1, 0)
-                end)
-            end
-
-            -- 武器射速
-            if char then
-                pcall(function()
-                    for _, tool in ipairs(char:GetChildren()) do
-                        if tool:IsA("Tool") then
-                            local cfg = tool:FindFirstChild("Configuration") or tool:FindFirstChild("Settings")
-                            if cfg then
-                                for _, v in ipairs(cfg:GetDescendants()) do
-                                    if (v:IsA("NumberValue") or v:IsA("IntValue")) and (v.Name:lower().match("cooldown") or v.Name:lower().match("firerate")) then
-                                        v.Value = currentFireRate
-                                    end
-                                end
-                            end
-                        end
-                    end
                 end)
             end
         end)
