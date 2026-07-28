@@ -1,4 +1,4 @@
--- WETQA高級面板 & Unnamed Enhancements - 終極虛空秒殺整合版
+-- WETQA 高級面板 & Unnamed Enhancements - 完全復刻整合版
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
@@ -6,307 +6,462 @@ local Lighting = game:GetService("Lighting")
 local player = Players.LocalPlayer
 
 -- 防止重複載入
-local oldGui = player.PlayerGui:FindFirstChild("WETQA_Ultimate_Menu")
+local oldGui = player.PlayerGui:FindFirstChild("WETQA_Enhancements_Menu")
 if oldGui then oldGui:Destroy() end
 
--- 建立主畫面
+-- 建立主畫面 (完全復刻 Unnamed 風格)
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "WETQA_Ultimate_Menu"
+ScreenGui.Name = "WETQA_Enhancements_Menu"
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- 主視窗
+-- 主視窗框架
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 680, 0, 440)
-MainFrame.Position = UDim2.new(0.5, -340, 0.5, -220)
-MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-MainFrame.BorderSizePixel = 0
+MainFrame.Size = UDim2.new(0, 720, 0, 520)
+MainFrame.Position = UDim2.new(0.5, -360, 0.5, -260)
+MainFrame.BackgroundColor3 = Color3.fromRGB(12, 12, 16)
+MainFrame.BorderSizePixel = 1
+MainFrame.BorderColor3 = Color3.fromRGB(0, 255, 120)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 8)
-UICorner.Parent = MainFrame
-
--- 頂部標題列
+-- 頂部標題列 (已改為 WETQA 高階面板與你的 Discord 群組)
 local TopBar = Instance.new("Frame")
-TopBar.Size = UDim2.new(1, 0, 0, 38)
-TopBar.BackgroundColor3 = Color3.fromRGB(26, 26, 34)
+TopBar.Size = UDim2.new(1, 0, 0, 32)
+TopBar.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
 TopBar.BorderSizePixel = 0
 TopBar.Parent = MainFrame
 
-local TopCorner = Instance.new("UICorner")
-TopCorner.CornerRadius = UDim.new(0, 8)
-TopCorner.Parent = TopBar
-
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -20, 1, 0)
+Title.Size = UDim2.new(1, -200, 1, 0)
 Title.Position = UDim2.new(0, 15, 0, 0)
 Title.BackgroundTransparency = 1
-Title.Text = "⚡ WETQA高級面板 & 風怒機器人虛空秒殺"
+Title.Text = "WETQA 高階面板 - discord.gg/zdqUuQgBhQ"
 Title.TextColor3 = Color3.fromRGB(0, 255, 120)
 Title.TextSize = 13
-Title.Font = Enum.Font.GothamBold
+Title.Font = Enum.Font.Code
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = TopBar
 
--- 右上角關閉按鈕
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 38, 0, 38)
-CloseBtn.Position = UDim2.new(1, -38, 0, 0)
-CloseBtn.BackgroundTransparency = 1
-CloseBtn.Text = "X"
-CloseBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-CloseBtn.TextSize = 14
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.Parent = TopBar
+local GameTitle = Instance.new("TextLabel")
+GameTitle.Size = UDim2.new(0, 100, 1, 0)
+GameTitle.Position = UDim2.new(1, -110, 0, 0)
+GameTitle.BackgroundTransparency = 1
+GameTitle.Text = "Rivals"
+GameTitle.TextColor3 = Color3.fromRGB(80, 150, 255)
+GameTitle.TextSize = 13
+GameTitle.Font = Enum.Font.Code
+GameTitle.TextXAlignment = Enum.TextXAlignment.Right
+GameTitle.Parent = TopBar
 
-CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-end)
-
--- 切換鍵 (RightShift)
+-- 切換顯示鍵 (RightShift)
 UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.RightShift then
         MainFrame.Visible = not MainFrame.Visible
     end
 end)
 
--- 分頁按鈕容器
+-- 分頁按鈕列
 local TabBar = Instance.new("Frame")
-TabBar.Size = UDim2.new(1, -20, 0, 32)
-TabBar.Position = UDim2.new(0, 10, 0, 48)
-TabBar.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+TabBar.Size = UDim2.new(1, -24, 0, 28)
+TabBar.Position = UDim2.new(0, 12, 0, 42)
+TabBar.BackgroundTransparency = 1
 TabBar.Parent = MainFrame
 
-local TabCorner = Instance.new("UICorner")
-TabCorner.CornerRadius = UDim.new(0, 6)
-TabCorner.Parent = TabBar
+local tabs = {"main", "world", "esp", "visuals", "character", "misc", "settings"}
+local tabButtons = {}
+local contentFrames = {}
 
--- 內容滾動區
-local ContentContainer = Instance.new("ScrollingFrame")
-ContentContainer.Size = UDim2.new(1, -20, 1, -95)
-ContentContainer.Position = UDim2.new(0, 10, 0, 88)
-ContentContainer.BackgroundTransparency = 1
-ContentContainer.BorderSizePixel = 0
-ContentContainer.CanvasSize = UDim2.new(0, 0, 2.8, 0)
-ContentContainer.ScrollBarThickness = 4
-ContentContainer.Parent = MainFrame
+-- 內容呈現容器
+local Container = Instance.new("Frame")
+Container.Size = UDim2.new(1, -24, 1, -85)
+Container.Position = UDim2.new(0, 12, 0, 75)
+Container.BackgroundTransparency = 1
+Container.Parent = MainFrame
 
-local tabs = {"main", "aimbot", "esp", "world", "character", "enhancements"}
-
-local function renderTab(tabName)
-    ContentContainer:ClearAllChildren()
-    local yOffset = 10
+for i, name in ipairs(tabs) do
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0, 85, 1, 0)
+    btn.Position = UDim2.new(0, (i - 1) * 92, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+    btn.BorderColor3 = Color3.fromRGB(0, 255, 120)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    btn.Font = Enum.Font.Code
+    btn.TextSize = 13
+    btn.Parent = TabBar
     
-    local function addLabel(text, color)
-        local lbl = Instance.new("TextLabel")
-        lbl.Size = UDim2.new(1, 0, 0, 25)
-        lbl.Position = UDim2.new(0, 0, 0, yOffset)
-        lbl.BackgroundTransparency = 1
-        lbl.Text = text
-        lbl.TextColor3 = color or Color3.fromRGB(0, 255, 120)
-        lbl.Font = Enum.Font.GothamBold
-        lbl.TextSize = 14
-        lbl.TextXAlignment = Enum.TextXAlignment.Left
-        lbl.Parent = ContentContainer
-        yOffset = yOffset + 32
+    local cFrame = Instance.new("ScrollingFrame")
+    cFrame.Size = UDim2.new(1, 0, 1, 0)
+    cFrame.BackgroundTransparency = 1
+    cFrame.BorderSizePixel = 1
+    cFrame.BorderColor3 = Color3.fromRGB(0, 255, 120)
+    cFrame.CanvasSize = UDim2.new(0, 0, 2.5, 0)
+    cFrame.ScrollBarThickness = 4
+    cFrame.Visible = false
+    cFrame.Parent = Container
+    
+    contentFrames[name] = cFrame
+    
+    btn.MouseButton1Click:Connect(function()
+        for _, frame in pairs(contentFrames) do frame.Visible = false end
+        for _, b in pairs(tabButtons) do b.TextColor3 = Color3.fromRGB(200, 200, 200) end
+        cFrame.Visible = true
+        btn.TextColor3 = Color3.fromRGB(0, 255, 120)
+    end)
+    
+    table.insert(tabButtons, btn)
+end
+
+-- 預設開啟 main 分頁
+contentFrames["main"].Visible = true
+tabButtons[1].TextColor3 = Color3.fromRGB(0, 255, 120)
+
+-- ==========================================
+-- 各分頁內容與功能建構
+-- ==========================================
+
+-- 1. MAIN 分頁 (Aimbot & Silent Aim)
+do
+    local f = contentFrames["main"]
+    local y = 15
+    local function addHeader(txt)
+        local l = Instance.new("TextLabel")
+        l.Size = UDim2.new(1, -20, 0, 25)
+        l.Position = UDim2.new(0, 10, 0, y)
+        l.BackgroundTransparency = 1
+        l.Text = txt
+        l.TextColor3 = Color3.fromRGB(0, 255, 120)
+        l.Font = Enum.Font.Code
+        l.TextSize = 13
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.Parent = f
+        y = y + 30
     end
-
-    local function addButton(text, callback)
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, 0, 0, 38)
-        btn.Position = UDim2.new(0, 0, 0, yOffset)
-        btn.BackgroundColor3 = Color3.fromRGB(30, 30, 42)
-        btn.Text = "  " .. text
-        btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        btn.Font = Enum.Font.Gotham
-        btn.TextSize = 13
-        btn.TextXAlignment = Enum.TextXAlignment.Left
-        btn.Parent = ContentContainer
-        
-        local bc = Instance.new("UICorner")
-        bc.CornerRadius = UDim.new(0, 6)
-        bc.Parent = btn
-        
-        btn.MouseButton1Click:Connect(function()
-            callback(btn)
-        end)
-        
-        yOffset = yOffset + 46
-        return btn
-    end
-
-    if tabName == "main" then
-        addLabel("🔑 授權與驗證中心")
-        
-        local tb = Instance.new("TextBox")
-        tb.Size = UDim2.new(1, 0, 0, 38)
-        tb.Position = UDim2.new(0, 0, 0, yOffset)
-        tb.PlaceholderText = "Enter WETQA Key..."
-        tb.TextColor3 = Color3.fromRGB(255, 255, 255)
-        tb.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
-        tb.TextSize = 13
-        tb.Font = Enum.Font.Gotham
-        tb.Parent = ContentContainer
-        
-        if script_key then tb.Text = script_key end
-        local tc = Instance.new("UICorner") tc.CornerRadius = UDim.new(0, 6) tc.Parent = tb
-        yOffset = yOffset + 46
-        
-        local st = Instance.new("TextLabel")
-        st.Size = UDim2.new(1, 0, 0, 30)
-        st.Position = UDim2.new(0, 0, 0, yOffset)
-        st.BackgroundTransparency = 1
-        st.Text = "Status: 準備就緒，請點擊驗證"
-        st.TextColor3 = Color3.fromRGB(200, 200, 200)
-        st.Font = Enum.Font.Gotham
-        st.TextSize = 13
-        st.Parent = ContentContainer
-        yOffset = yOffset + 38
-
-        addButton("Verify Key 驗證金鑰", function(btn)
-            st.Text = "Checking key..."
-            task.wait(0.3)
-            if tb.Text ~= "" and script_key and tb.Text == script_key then
-                st.TextColor3 = Color3.fromRGB(0, 255, 120)
-                st.Text = "✅ [Verified] WETQA 高級面板啟用成功！"
-            else
-                st.TextColor3 = Color3.fromRGB(255, 80, 80)
-                st.Text = "❌ Invalid Key or Mismatched!"
-            end
-        end)
-
-    elseif tabName == "aimbot" then
-        addLabel("🎯 自瞄與戰鬥模組")
-        local aimOn = false
-        addButton("📌 Aimbot (Silent/Legit): [ OFF ]", function(btn)
-            aimOn = not aimOn
-            btn.Text = aimOn and "  📌 Aimbot (Silent/Legit): [ ON ]" or "  📌 Aimbot (Silent/Legit): [ OFF ]"
-            btn.BackgroundColor3 = aimOn and Color3.fromRGB(0, 120, 80) or Color3.fromRGB(30, 30, 42)
-        end)
-
-        RunService.RenderStepped:Connect(function()
-            if aimOn then
-                local cam = workspace.CurrentCamera
-                for _, p in ipairs(Players:GetPlayers()) do
-                    if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
-                        cam.CFrame = CFrame.new(cam.CFrame.Position, p.Character.Head.Position)
-                        break
-                    end
-                end
-            end
-        end)
-
-    elseif tabName == "esp" then
-        addLabel("👀 透視與視覺模組 (ESP)")
-        local espOn = false
-        addButton("👁️ Chams & Box ESP: [ OFF ]", function(btn)
-            espOn = not espOn
-            btn.Text = espOn and "  👁️ Chams & Box ESP: [ ON ]" or "  👁️ Chams & Box ESP: [ OFF ]"
-            btn.BackgroundColor3 = espOn and Color3.fromRGB(0, 120, 80) or Color3.fromRGB(30, 30, 42)
+    
+    addHeader("silent aim & aimbot")
+    
+    local aimOn = false
+    local aimBtn = Instance.new("TextButton")
+    aimBtn.Size = UDim2.new(1, -20, 0, 35)
+    aimBtn.Position = UDim2.new(0, 10, 0, y)
+    aimBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    aimBtn.BorderColor3 = Color3.fromRGB(0, 255, 120)
+    aimBtn.Text = "  [  ] enabled (Aimbot Lock)"
+    aimBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    aimBtn.Font = Enum.Font.Code
+    aimBtn.TextSize = 12
+    aimBtn.TextXAlignment = Enum.TextXAlignment.Left
+    aimBtn.Parent = f
+    
+    aimBtn.MouseButton1Click:Connect(function()
+        aimOn = not aimOn
+        aimBtn.Text = aimOn and "  [✔] enabled (Aimbot Lock)" or "  [  ] enabled (Aimbot Lock)"
+        aimBtn.BackgroundColor3 = aimOn and Color3.fromRGB(0, 100, 60) or Color3.fromRGB(20, 20, 30)
+    end)
+    
+    RunService.RenderStepped:Connect(function()
+        if aimOn then
+            local cam = workspace.CurrentCamera
             for _, p in ipairs(Players:GetPlayers()) do
-                if p ~= player and p.Character then
-                    if espOn then
-                        local hl = Instance.new("Highlight")
-                        hl.Name = "WETQA_ESP"
-                        hl.Adornee = p.Character
-                        hl.FillColor = Color3.fromRGB(0, 255, 120)
-                        hl.Parent = p.Character
-                    else
-                        local hl = p.Character:FindFirstChild("WETQA_ESP")
-                        if hl then hl:Destroy() end
-                    end
+                if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
+                    cam.CFrame = CFrame.new(cam.CFrame.Position, p.Character.Head.Position)
+                    break
                 end
             end
-        end)
-
-    elseif tabName == "world" then
-        addLabel("🌍 世界與環境模組")
-        local skies = {
-            {"🌌 Aurora Night", "rbxassetid://644551720"},
-            {"🌠 Galaxy Nebula", "rbxassetid://155091771"},
-            {"🌅 Sunset Glow", "rbxassetid://600830600"}
-        }
-        for _, skyData in ipairs(skies) do
-            addButton(skyData[1], function()
-                Lighting.ClockTime = 0
-                Lighting.Brightness = 2
-                for _, v in ipairs(Lighting:GetChildren()) do if v:IsA("Sky") then v:Destroy() end end
-                local sky = Instance.new("Sky")
-                sky.SkyboxBk = skyData[2] sky.SkyboxDn = skyData[2] sky.SkyboxFt = skyData[2]
-                sky.SkyboxLf = skyData[2] sky.SkyboxRt = skyData[2] sky.SkyboxUp = skyData[2]
-                sky.Parent = Lighting
-            end)
         end
+    end)
+end
 
-    elseif tabName == "character" then
-        addLabel("⚡ 角色與移動強化")
-        local speedOn = false
-        addButton("🚀 WalkSpeed Overclock (100): [ OFF ]", function(btn)
-            speedOn = not speedOn
-            btn.Text = speedOn and "  🚀 WalkSpeed Overclock (100): [ ON ]" or "  🚀 WalkSpeed Overclock (100): [ OFF ]"
-            btn.BackgroundColor3 = speedOn and Color3.fromRGB(0, 120, 80) or Color3.fromRGB(30, 30, 42)
-            local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-            if hum then hum.WalkSpeed = speedOn and 100 or 16 end
+-- 2. WORLD 分頁
+do
+    local f = contentFrames["world"]
+    local y = 15
+    local function addHeader(txt)
+        local l = Instance.new("TextLabel")
+        l.Size = UDim2.new(1, -20, 0, 25)
+        l.Position = UDim2.new(0, 10, 0, y)
+        l.BackgroundTransparency = 1
+        l.Text = txt
+        l.TextColor3 = Color3.fromRGB(0, 255, 120)
+        l.Font = Enum.Font.Code
+        l.TextSize = 13
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.Parent = f
+        y = y + 30
+    end
+    addHeader("skybox & atmosphere")
+    
+    local skies = {
+        {"🌌 Aurora Night", "rbxassetid://644551720"},
+        {"🌠 Galaxy Nebula", "rbxassetid://155091771"},
+        {"🌅 Sunset Glow", "rbxassetid://600830600"}
+    }
+    for _, skyData in ipairs(skies) do
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(1, -20, 0, 35)
+        b.Position = UDim2.new(0, 10, 0, y)
+        b.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+        b.BorderColor3 = Color3.fromRGB(0, 255, 120)
+        b.Text = "  > " .. skyData[1]
+        b.TextColor3 = Color3.fromRGB(255, 255, 255)
+        b.Font = Enum.Font.Code
+        b.TextSize = 12
+        b.TextXAlignment = Enum.TextXAlignment.Left
+        b.Parent = f
+        
+        b.MouseButton1Click:Connect(function()
+            Lighting.ClockTime = 0
+            Lighting.Brightness = 2
+            for _, v in ipairs(Lighting:GetChildren()) do if v:IsA("Sky") then v:Destroy() end end
+            local sky = Instance.new("Sky")
+            sky.SkyboxBk = skyData[2] sky.SkyboxDn = skyData[2] sky.SkyboxFt = skyData[2]
+            sky.SkyboxLf = skyData[2] sky.SkyboxRt = skyData[2] sky.SkyboxUp = skyData[2]
+            sky.Parent = Lighting
         end)
+        y = y + 42
+    end
+end
 
-    elseif tabName == "enhancements" then
-        addLabel("⚡ 專屬功能與風怒虛空秒殺")
-        local fbOn = false
-        addButton("🚀 Fullbright & No Fog: [ OFF ]", function(btn)
-            fbOn = not fbOn
-            btn.Text = fbOn and "  🚀 Fullbright & No Fog: [ ON ]" or "  🚀 Fullbright & No Fog: [ OFF ]"
-            btn.BackgroundColor3 = fbOn and Color3.fromRGB(0, 120, 80) or Color3.fromRGB(30, 30, 42)
-            Lighting.Brightness = fbOn and 3 or 1
-            Lighting.GlobalShadows = not fbOn
-        end)
+-- 3. ESP 分頁
+do
+    local f = contentFrames["esp"]
+    local y = 15
+    local function addHeader(txt)
+        local l = Instance.new("TextLabel")
+        l.Size = UDim2.new(1, -20, 0, 25)
+        l.Position = UDim2.new(0, 10, 0, y)
+        l.BackgroundTransparency = 1
+        l.Text = txt
+        l.TextColor3 = Color3.fromRGB(0, 255, 120)
+        l.Font = Enum.Font.Code
+        l.TextSize = 13
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.Parent = f
+        y = y + 30
+    end
+    addHeader("esp options & override appearance")
+    
+    local espOn = false
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1, -20, 0, 35)
+    b.Position = UDim2.new(0, 10, 0, y)
+    b.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    b.BorderColor3 = Color3.fromRGB(0, 255, 120)
+    b.Text = "  [  ] box / chams esp"
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.Code
+    b.TextSize = 12
+    b.TextXAlignment = Enum.TextXAlignment.Left
+    b.Parent = f
+    
+    b.MouseButton1Click:Connect(function()
+        espOn = not espOn
+        b.Text = espOn and "  [✔] box / chams esp" or "  [  ] box / chams esp"
+        b.BackgroundColor3 = espOn and Color3.fromRGB(0, 100, 60) or Color3.fromRGB(20, 20, 30)
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p ~= player and p.Character then
+                if espOn then
+                    local hl = Instance.new("Highlight")
+                    hl.Name = "WETQA_ESP"
+                    hl.Adornee = p.Character
+                    hl.FillColor = Color3.fromRGB(0, 255, 120)
+                    hl.Parent = p.Character
+                else
+                    local hl = p.Character:FindFirstChild("WETQA_ESP")
+                    if hl then hl:Destroy() end
+                end
+            end
+        end
+    end)
+end
 
-        local windBotOn = false
-        addButton("🌪️ 風怒機器人 (虛空攻擊 & 自動秒殺): [ OFF ]", function(btn)
-            windBotOn = not windBotOn
-            btn.Text = windBotOn and "  🌪️ 風怒機器人 (虛空攻擊 & 自動秒殺): [ ON ]" or "  🌪️ 風怒機器人 (虛空攻擊 & 自動秒殺): [ OFF ]"
-            btn.BackgroundColor3 = windBotOn and Color3.fromRGB(180, 40, 40) or Color3.fromRGB(30, 30, 42)
-        end)
+-- 4. VISUALS 分頁
+do
+    local f = contentFrames["visuals"]
+    local y = 15
+    local function addHeader(txt)
+        local l = Instance.new("TextLabel")
+        l.Size = UDim2.new(1, -20, 0, 25)
+        l.Position = UDim2.new(0, 10, 0, y)
+        l.BackgroundTransparency = 1
+        l.Text = txt
+        l.TextColor3 = Color3.fromRGB(0, 255, 120)
+        l.Font = Enum.Font.Code
+        l.TextSize = 13
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.Parent = f
+        y = y + 30
+    end
+    addHeader("crosshair & viewmodel")
+    
+    local crossGui = player:PlayerGui:FindFirstChild("WETQA_Crosshair")
+    if not crossGui then
+        crossGui = Instance.new("ScreenGui")
+        crossGui.Name = "WETQA_Crosshair"
+        crossGui.Enabled = false
+        crossGui.Parent = player.PlayerGui
+        local dot = Instance.new("Frame")
+        dot.Size = UDim2.new(0, 8, 0, 8)
+        dot.Position = UDim2.new(0.5, -4, 0.5, -4)
+        dot.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+        dot.BorderSizePixel = 0
+        dot.Parent = crossGui
+        local dc = Instance.new("UICorner") dc.CornerRadius = UDim.new(1, 0) dc.Parent = dot
+    end
+    
+    local crossOn = false
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1, -20, 0, 35)
+    b.Position = UDim2.new(0, 10, 0, y)
+    b.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    b.BorderColor3 = Color3.fromRGB(0, 255, 120)
+    b.Text = "  [  ] enabled (Circular Crosshair)"
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.Code
+    b.TextSize = 12
+    b.TextXAlignment = Enum.TextXAlignment.Left
+    b.Parent = f
+    
+    b.MouseButton1Click:Connect(function()
+        crossOn = not crossOn
+        crossGui.Enabled = crossOn
+        b.Text = crossOn and "  [✔] enabled (Circular Crosshair)" or "  [  ] enabled (Circular Crosshair)"
+        b.BackgroundColor3 = crossOn and Color3.fromRGB(0, 100, 60) or Color3.fromRGB(20, 20, 30)
+    end)
+end
 
-        -- 風怒機器人虛空秒殺循環執行緒
-        RunService.Heartbeat:Connect(function()
-            if windBotOn then
-                pcall(function()
-                    for _, p in ipairs(Players:GetPlayers()) do
-                        if p ~= player and p.Character then
-                            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                            local hum = p.Character:FindFirstChildOfClass("Humanoid")
-                            if hrp and hum and hum.Health > 0 then
-                                -- 1. 將目標傳送到虛空 (Y軸拉到極低位置) 實現虛空攻擊
-                                hrp.CFrame = hrp.CFrame + Vector3.new(0, -5000, 0)
-                                -- 2. 自動攻擊瞬間清空血量秒殺
-                                hum.Health = 0
-                            end
+-- 5. CHARACTER 分頁
+do
+    local f = contentFrames["character"]
+    local y = 15
+    local function addHeader(txt)
+        local l = Instance.new("TextLabel")
+        l.Size = UDim2.new(1, -20, 0, 25)
+        l.Position = UDim2.new(0, 10, 0, y)
+        l.BackgroundTransparency = 1
+        l.Text = txt
+        l.TextColor3 = Color3.fromRGB(0, 255, 120)
+        l.Font = Enum.Font.Code
+        l.TextSize = 13
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.Parent = f
+        y = y + 30
+    end
+    addHeader("movement & character options")
+    
+    local speedOn = false
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1, -20, 0, 35)
+    b.Position = UDim2.new(0, 10, 0, y)
+    b.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    b.BorderColor3 = Color3.fromRGB(0, 255, 120)
+    b.Text = "  [  ] velocity speed (100)"
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.Code
+    b.TextSize = 12
+    b.TextXAlignment = Enum.TextXAlignment.Left
+    b.Parent = f
+    
+    b.MouseButton1Click:Connect(function()
+        speedOn = not speedOn
+        b.Text = speedOn and "  [✔] velocity speed (100)" or "  [  ] velocity speed (100)"
+        b.BackgroundColor3 = speedOn and Color3.fromRGB(0, 100, 60) or Color3.fromRGB(20, 20, 30)
+        local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum.WalkSpeed = speedOn and 100 or 16 end
+    end)
+end
+
+-- 6. MISC 分頁 (內含風怒機器人虛空秒殺)
+do
+    local f = contentFrames["misc"]
+    local y = 15
+    local function addHeader(txt)
+        local l = Instance.new("TextLabel")
+        l.Size = UDim2.new(1, -20, 0, 25)
+        l.Position = UDim2.new(0, 10, 0, y)
+        l.BackgroundTransparency = 1
+        l.Text = txt
+        l.TextColor3 = Color3.fromRGB(0, 255, 120)
+        l.Font = Enum.Font.Code
+        l.TextSize = 13
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.Parent = f
+        y = y + 30
+    end
+    addHeader("auto queue & custom windbot void-attack")
+    
+    local windBotOn = false
+    local b = Instance.new("TextButton")
+    b.Size = UDim2.new(1, -20, 0, 35)
+    b.Position = UDim2.new(0, 10, 0, y)
+    b.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    b.BorderColor3 = Color3.fromRGB(0, 255, 120)
+    b.Text = "  [  ] windbot void attack & auto kill"
+    b.TextColor3 = Color3.fromRGB(255, 255, 255)
+    b.Font = Enum.Font.Code
+    b.TextSize = 12
+    b.TextXAlignment = Enum.TextXAlignment.Left
+    b.Parent = f
+    
+    b.MouseButton1Click:Connect(function()
+        windBotOn = not windBotOn
+        b.Text = windBotOn and "  [✔] windbot void attack & auto kill" or "  [  ] windbot void attack & auto kill"
+        b.BackgroundColor3 = windBotOn and Color3.fromRGB(150, 40, 40) or Color3.fromRGB(20, 20, 30)
+    end)
+    
+    -- 風怒機器人虛空秒殺循環
+    RunService.Heartbeat:Connect(function()
+        if windBotOn then
+            pcall(function()
+                for _, p in ipairs(Players:GetPlayers()) do
+                    if p ~= player and p.Character then
+                        local hrp = p.Character:FindFirstChild("HumanoidRootPart")
+                        local hum = p.Character:FindFirstChildOfClass("Humanoid")
+                        if hrp and hum and hum.Health > 0 then
+                            hrp.CFrame = hrp.CFrame + Vector3.new(0, -5000, 0)
+                            hum.Health = 0
                         end
                     end
-                end)
-            end
-        end)
+                end
+            end)
+        end
+    end)
+end
+
+-- 7. SETTINGS 分頁
+do
+    local f = contentFrames["settings"]
+    local y = 15
+    local function addHeader(txt)
+        local l = Instance.new("TextLabel")
+        l.Size = UDim2.new(1, -20, 0, 25)
+        l.Position = UDim2.new(0, 10, 0, y)
+        l.BackgroundTransparency = 1
+        l.Text = txt
+        l.TextColor3 = Color3.fromRGB(0, 255, 120)
+        l.Font = Enum.Font.Code
+        l.TextSize = 13
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.Parent = f
+        y = y + 30
     end
-end
-
--- 建立分頁按鈕
-for i, name in ipairs(tabs) do
-    local tabBtn = Instance.new("TextButton")
-    tabBtn.Size = UDim2.new(1 / #tabs, -4, 1, -4)
-    tabBtn.Position = UDim2.new((i - 1) / #tabs, 2, 0, 2)
-    tabBtn.BackgroundColor3 = Color3.fromRGB(26, 26, 34)
-    tabBtn.Text = name:upper()
-    tabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-    tabBtn.Font = Enum.Font.GothamBold
-    tabBtn.TextSize = 10
-    tabBtn.Parent = TabBar
+    addHeader("configuration & menu options")
     
-    local tc = Instance.new("UICorner") tc.CornerRadius = UDim.new(0, 4) tc.Parent = tabBtn
-    tabBtn.MouseButton1Click:Connect(function() renderTab(name) end)
+    local closeB = Instance.new("TextButton")
+    closeB.Size = UDim2.new(1, -20, 0, 35)
+    closeB.Position = UDim2.new(0, 10, 0, y)
+    closeB.BackgroundColor3 = Color3.fromRGB(120, 30, 30)
+    closeB.BorderColor3 = Color3.fromRGB(0, 255, 120)
+    closeB.Text = "  > Unload & Close Menu"
+    closeB.TextColor3 = Color3.fromRGB(255, 255, 255)
+    closeB.Font = Enum.Font.Code
+    closeB.TextSize = 12
+    closeB.TextXAlignment = Enum.TextXAlignment.Left
+    closeB.Parent = f
+    
+    closeB.MouseButton1Click:Connect(function()
+        ScreenGui:Destroy()
+    end)
 end
-
--- 預設開啟首頁
-renderTab("main")
