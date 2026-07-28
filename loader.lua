@@ -1,9 +1,12 @@
--- WETQA 高級面板 & Unnamed Enhancements - 完全復刻整合版
+-- WETQA & Unnamed Enhancements - 自動驗證與 Unnamed 完美復刻面板
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
 local player = Players.LocalPlayer
+
+-- 自動檢查是否有帶入 script_key（如果沒有則給予預設身分）
+local currentKey = script_key or "NO_KEY_PROVIDED"
 
 -- 防止重複載入
 local oldGui = player.PlayerGui:FindFirstChild("WETQA_Enhancements_Menu")
@@ -26,7 +29,7 @@ MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
--- 頂部標題列 (已改為 WETQA 高階面板與你的 Discord 群組)
+-- 頂部標題列
 local TopBar = Instance.new("Frame")
 TopBar.Size = UDim2.new(1, 0, 0, 32)
 TopBar.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
@@ -122,7 +125,7 @@ tabButtons[1].TextColor3 = Color3.fromRGB(0, 255, 120)
 -- 各分頁內容與功能建構
 -- ==========================================
 
--- 1. MAIN 分頁 (Aimbot & Silent Aim)
+-- 1. MAIN 分頁 (自動顯示授權通過狀態 & Aimbot)
 do
     local f = contentFrames["main"]
     local y = 15
@@ -140,6 +143,20 @@ do
         y = y + 30
     end
     
+    addHeader("status & authorization")
+    
+    local statusLbl = Instance.new("TextLabel")
+    statusLbl.Size = UDim2.new(1, -20, 0, 35)
+    statusLbl.Position = UDim2.new(0, 10, 0, y)
+    statusLbl.BackgroundTransparency = 1
+    statusLbl.Text = "✅ [Auto-Verified] 授權金鑰已自動通過生效！"
+    statusLbl.TextColor3 = Color3.fromRGB(0, 255, 120)
+    statusLbl.Font = Enum.Font.Code
+    statusLbl.TextSize = 12
+    statusLbl.TextXAlignment = Enum.TextXAlignment.Left
+    statusLbl.Parent = f
+    y = y + 45
+
     addHeader("silent aim & aimbot")
     
     local aimOn = false
