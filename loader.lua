@@ -1,13 +1,18 @@
--- WETQAPremium - 市面上最美、顏值最高、宇宙最強黑科技旗艦版 [Discord: https://discord.gg/zdqUuQgBhQ]
+-- WETQAPremium - 最終強固驗證版 [Discord: https://discord.gg/zdqUuQgBhQ]
 task.spawn(function()
     task.wait(0.5)
 
+    -- 🛡️ 強制防護：若沒有 script_key 則自動建立或提示
     if not getgenv().script_key or getgenv().script_key == "" then
-        pcall(function()
-            local p = game:GetService("Players").LocalPlayer
-            if p then p:Kick("WETQAPremium Security: ❌ 驗證失敗！請先至 Discord (https://discord.gg/zdqUuQgBhQ) 取得專屬授權 Key！") end
-        end)
-        return
+        if script_key and script_key ~= "" then
+            getgenv().script_key = script_key
+        else
+            pcall(function()
+                local p = game:GetService("Players").LocalPlayer
+                if p then p:Kick("WETQAPremium Security: ❌ 驗證失敗！請確認執行時上方有宣告 script_key = \"您的金鑰\"！") end
+            end)
+            return
+        end
     end
 
     local success, err = pcall(function()
@@ -22,7 +27,6 @@ task.spawn(function()
         local player = Players.LocalPlayer or Players.PlayerAdded:Wait()
         local playerGui = player:WaitForChild("PlayerGui")
 
-        -- 清理舊介面
         local oldGui = playerGui:FindFirstChild("WETQAPremium_ModernUI")
         if oldGui then oldGui:Destroy() end
         local oldHud = playerGui:FindFirstChild("WETQAPremium_HUD")
@@ -39,7 +43,6 @@ task.spawn(function()
         local customPlayerColor = Color3.fromRGB(0, 255, 255)
         local customWeaponColor = Color3.fromRGB(255, 0, 128)
 
-        -- 1. 中央動態炫彩準心圈
         local circleGui = Instance.new("ScreenGui")
         circleGui.Name = "WETQAPremium_Circle"
         circleGui.ResetOnSpawn = false
@@ -72,7 +75,6 @@ task.spawn(function()
         vLine.BorderSizePixel = 0
         vLine.Parent = circleFrame
 
-        -- 2. 左上角即時狀態小視窗 (HUD)
         local hudGui = Instance.new("ScreenGui")
         hudGui.Name = "WETQAPremium_HUD"
         hudGui.ResetOnSpawn = false
@@ -113,7 +115,6 @@ task.spawn(function()
         statusListLabel.TextYAlignment = Enum.TextYAlignment.Top
         statusListLabel.Parent = statusBox
 
-        -- 3. 市面上最高級、最好看的現代化面板 (Modern UI)
         local ScreenGui = Instance.new("ScreenGui")
         ScreenGui.Name = "WETQAPremium_ModernUI"
         ScreenGui.ResetOnSpawn = false
@@ -134,7 +135,6 @@ task.spawn(function()
         mainStroke.Thickness = 2
         mainStroke.Parent = MainFrame
 
-        -- 頂部導航列 (TopBar)
         local TopBar = Instance.new("Frame")
         TopBar.Size = UDim2.new(1, 0, 0, 45)
         TopBar.BackgroundColor3 = Color3.fromRGB(15, 20, 30)
@@ -160,7 +160,6 @@ task.spawn(function()
             end
         end)
 
-        -- 頁籤按鈕容器 (Tab Bar)
         local TabBar = Instance.new("Frame")
         TabBar.Size = UDim2.new(0, 180, 1, -55)
         TabBar.Position = UDim2.new(0, 10, 0, 50)
@@ -169,7 +168,6 @@ task.spawn(function()
         TabBar.Parent = MainFrame
         Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 8)
 
-        -- 內容頁面容器 (Content Area)
         local ContentArea = Instance.new("Frame")
         ContentArea.Size = UDim2.new(1, -205, 1, -55)
         ContentArea.Position = UDim2.new(0, 195, 0, 50)
@@ -179,7 +177,6 @@ task.spawn(function()
         ContentArea.Parent = MainFrame
         Instance.new("UICorner", ContentArea).CornerRadius = UDim.new(0, 8)
 
-        -- 建立多頁籤切換系統
         local pages = {}
         local tabButtons = {}
 
@@ -223,7 +220,6 @@ task.spawn(function()
         local page3 = createPage("3. 透視與防禦無敵", 3)
         local page4 = createPage("4. 音效與天空自訂", 4)
 
-        -- 封裝生成控制項的函數
         local function addControlToPage(page, yPos, text, callback)
             local btn = Instance.new("TextButton")
             btn.Size = UDim2.new(1, -20, 0, 34)
@@ -255,14 +251,12 @@ task.spawn(function()
             return btn
         end
 
-        -- 頁面 1：幻彩與視覺
         addControlToPage(page1, 10, "全身上下 360 度自動閃顏色變色 (Rainbow Player Body)", function(v) getgenv().rbBody = v end)
         addControlToPage(page1, 50, "自訂人物固定發光顏色 (Custom Player Color)", function(v) getgenv().custBody = v end)
         addControlToPage(page1, 90, "全武器與小刀自動閃顏色/炫彩變色 (Rainbow Weapon & Knife)", function(v) getgenv().rbWeapon = v end)
         addControlToPage(page1, 130, "自訂武器與小刀固定顏色 (Custom Weapon Color)", function(v) getgenv().custWeapon = v end)
         addControlToPage(page1, 170, "世界萬物地圖全自動炫彩變色 (Rainbow World Theme)", function(v) getgenv().rbWorld = v end)
 
-        -- 頁面 2：暴怒與盲狙
         local y2 = 10
         local function addP2(t, cb) addControlToPage(page2, y2, t, cb) y2 = y2 + 40 end
         addP2("超穩盲狙暴怒 (畫面正常，伺服器判定亂飛秒殺)", function(v) getgenv().rageOn = v end)
@@ -271,7 +265,6 @@ task.spawn(function()
         addP2("敵方超大判定框黑科技 (Super Hitbox - 敵人變大 35 倍)", function(v) getgenv().hitboxOn = v end)
         addP2("防禦亂向抖動旋轉 (Anti-Aim Jitter)", function(v) getgenv().jitterOn = v end)
 
-        -- 頁面 3：透視與防禦
         local y3 = 10
         local function addP3(t, cb) addControlToPage(page3, y3, t, cb) y3 = y3 + 40 end
         addP3("3D 立體高精準方框透視 (3D Box ESP)", function(v) getgenv().boxOn = v end)
@@ -282,7 +275,6 @@ task.spawn(function()
         addP3("順滑無暈眩飛天穿牆 (Smooth Noclip & Fly)", function(v) getgenv().flyOn = v end)
         addP3("百米內自動蒸發殺戮光環 (Hit Kill Aura)", function(v) getgenv().auraOn = v end)
 
-        -- 頁面 4：音效與天空
         local skyBtn = Instance.new("TextButton")
         skyBtn.Size = UDim2.new(1, -20, 0, 36)
         skyBtn.Position = UDim2.new(0, 10, 0, 10)
@@ -334,7 +326,6 @@ task.spawn(function()
             task.delay(2, function() soundBtn.Text = "  > [點擊測試] 50+ 頂級擊殺/開槍音效庫" end)
         end)
 
-        -- 核心主運行迴圈 (RenderStepped)
         RunService.RenderStepped:Connect(function()
             local cam = workspace.CurrentCamera
             local char = player.Character
@@ -349,7 +340,6 @@ task.spawn(function()
 
             cStroke.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
 
-            -- 左上角即時狀態更新
             local activeTexts = {}
             if getgenv().rbBody then table.insert(activeTexts, "[+] rainbow body") end
             if getgenv().custBody then table.insert(activeTexts, "[+] custom body color") end
@@ -363,7 +353,6 @@ task.spawn(function()
             table.insert(activeTexts, "[+] WETQAPremium Active")
             statusListLabel.Text = table.concat(activeTexts, "\n")
 
-            -- 人物變色
             if char then
                 pcall(function()
                     for _, part in ipairs(char:GetDescendants()) do
@@ -379,7 +368,6 @@ task.spawn(function()
                 end)
             end
 
-            -- 武器變色與極速射速
             if char then
                 pcall(function()
                     for _, tool in ipairs(char:GetChildren()) do
@@ -407,7 +395,6 @@ task.spawn(function()
                 end)
             end
 
-            -- 世界萬物變色
             if getgenv().rbWorld then
                 pcall(function()
                     for _, obj in ipairs(Workspace:GetDescendants()) do
@@ -418,7 +405,6 @@ task.spawn(function()
                 end)
             end
 
-            -- 暴怒與盲狙
             if getgenv().rageOn or getgenv().spinOn or getgenv().peekOn then
                 pcall(function()
                     if hrp and getgenv().spinOn then
@@ -444,7 +430,6 @@ task.spawn(function()
                 end)
             end
 
-            -- 超大判定框 Hitbox
             for _, p in ipairs(Players:GetPlayers()) do
                 if p ~= player and p.Character then
                     local root = p.Character:FindFirstChild("HumanoidRootPart")
@@ -490,7 +475,6 @@ task.spawn(function()
                 end)
             end
 
-            -- 3D Box ESP
             for _, p in ipairs(Players:GetPlayers()) do
                 if p ~= player and p.Character then
                     local box = p.Character:FindFirstChild("WETQAPremium_Box")
