@@ -1,5 +1,5 @@
--- WETQAPremium - Clean Universal Edition [Discord: https://discord.gg/zdqUuQgBhQ]
--- 跨平台注射器支援、完美置中載入畫面與主面板、500+ 具備真實執行邏輯的黑科技模組、各類功能嚴格獨立分區、高階飽和度交疊色彩轉圈準心與內建造型外觀改皮掛 (Skin Changer)
+-- WETQAPremium - Optimized Powerful Core Edition [Discord: https://discord.gg/zdqUuQgBhQ]
+-- 跨平台注射器支援、完美置中載入與主面板、核心精簡高效、高階飽和度交疊色彩轉圈準心與內建造型改皮掛
 
 task.spawn(function()
     task.wait(0.5)
@@ -8,10 +8,6 @@ task.spawn(function()
     local UserInputService = game:GetService("UserInputService")
     local RunService = game:GetService("RunService")
     local Lighting = game:GetService("Lighting")
-    local SoundService = game:GetService("SoundService")
-    local VirtualUser = game:GetService("VirtualUser")
-    local Workspace = game:GetService("Workspace")
-    local HttpService = game:GetService("HttpService")
     local CoreGui = game:GetService("CoreGui")
     local TweenService = game:GetService("TweenService")
     
@@ -66,21 +62,21 @@ task.spawn(function()
     splashText.Size = UDim2.new(1, 0, 0, 30)
     splashText.Position = UDim2.new(0, 0, 1, -35)
     splashText.BackgroundTransparency = 1
-    splashText.Text = "WETQAPremium - 載入 500+ 功能中..."
+    splashText.Text = "WETQAPremium - 載入強效核心中..."
     splashText.TextColor3 = Color3.fromRGB(0, 150, 255)
     splashText.Font = Enum.Font.Code
     splashText.TextSize = 11
     splashText.Parent = splashFrame
 
-    task.delay(2.0, function()
-        TweenService:Create(splashFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(splashImg, TweenInfo.new(0.5), {ImageTransparency = 1}):Play()
-        TweenService:Create(splashText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-        task.wait(0.5)
+    task.delay(1.5, function()
+        TweenService:Create(splashFrame, TweenInfo.new(0.4), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(splashImg, TweenInfo.new(0.4), {ImageTransparency = 1}):Play()
+        TweenService:Create(splashText, TweenInfo.new(0.4), {TextTransparency = 1}):Play()
+        task.wait(0.4)
         splashGui:Destroy()
     end)
 
-    -- 2. 跨平台通用註冊器（置中）
+    -- 2. 註冊器（置中）
     local keyGui = Instance.new("ScreenGui")
     keyGui.Name = "WETQAPremium_KeySystem"
     keyGui.ResetOnSpawn = false
@@ -100,7 +96,7 @@ task.spawn(function()
     local keyTitle = Instance.new("TextLabel")
     keyTitle.Size = UDim2.new(1, 0, 0, 32)
     keyTitle.BackgroundTransparency = 1
-    keyTitle.Text = "WETQAPremium - Universal Key System"
+    keyTitle.Text = "WETQAPremium - Key System"
     keyTitle.TextColor3 = Color3.fromRGB(0, 150, 255)
     keyTitle.Font = Enum.Font.Code
     keyTitle.TextSize = 11
@@ -122,8 +118,8 @@ task.spawn(function()
     keyBox.BackgroundColor3 = Color3.fromRGB(10, 18, 32)
     keyBox.BorderColor3 = Color3.fromRGB(0, 150, 255)
     keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-    keyBox.PlaceholderText = "請輸入金鑰 (Script Key)..."
-    keyBox.Text = getgenv().script_key or "WETQA-FREE-KEY"
+    keyBox.PlaceholderText = "請輸入金鑰..."
+    keyBox.Text = getgenv().script_key or "WETQA-KEY"
     keyBox.Font = Enum.Font.Code
     keyBox.TextSize = 10
     keyBox.Parent = keyFrame
@@ -133,7 +129,7 @@ task.spawn(function()
     submitBtn.Position = UDim2.new(0, 20, 0, 125)
     submitBtn.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
     submitBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-    submitBtn.Text = "驗證解鎖 (Submit)"
+    submitBtn.Text = "驗證解鎖"
     submitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     submitBtn.Font = Enum.Font.Code
     submitBtn.TextSize = 10
@@ -144,7 +140,7 @@ task.spawn(function()
     getBtn.Position = UDim2.new(0, 175, 0, 125)
     getBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 50)
     getBtn.BorderColor3 = Color3.fromRGB(0, 150, 255)
-    getBtn.Text = "取得金鑰 (Get Key)"
+    getBtn.Text = "取得金鑰"
     getBtn.TextColor3 = Color3.fromRGB(200, 220, 255)
     getBtn.Font = Enum.Font.Code
     getBtn.TextSize = 10
@@ -154,7 +150,7 @@ task.spawn(function()
     statusMsg.Size = UDim2.new(1, 0, 0, 25)
     statusMsg.Position = UDim2.new(0, 0, 1, -28)
     statusMsg.BackgroundTransparency = 1
-    statusMsg.Text = "狀態: 注射器已就緒，請點擊驗證"
+    statusMsg.Text = "狀態: 請輸入金鑰以啟動強效核心"
     statusMsg.TextColor3 = Color3.fromRGB(180, 180, 180)
     statusMsg.Font = Enum.Font.Code
     statusMsg.TextSize = 9
@@ -163,7 +159,7 @@ task.spawn(function()
     getBtn.MouseButton1Click:Connect(function()
         pcall(function()
             setclipboard("https://discord.gg/zdqUuQgBhQ")
-            statusMsg.Text = "已複製 Discord 連結至剪貼簿！"
+            statusMsg.Text = "已複製 Discord 連結！"
         end)
     end)
 
@@ -180,7 +176,7 @@ task.spawn(function()
 
     repeat task.wait(0.5) until keyVerified
 
-    -- 3. 正式載入主程式
+    -- 3. 主程式（精簡高效強效版）
     local success, err = pcall(function()
         local themeColor = Color3.fromRGB(0, 150, 255)
         local circleOuterColor = Color3.fromRGB(255, 255, 255)
@@ -190,15 +186,12 @@ task.spawn(function()
         local blendColor3 = Color3.fromRGB(50, 100, 255)
         local colorSaturation = 0.85
 
-        local currentWalkSpeed = 450
-        local currentJumpPower = 450
-        local currentFireRate = 0.00000001
-        local currentFlySpeed = 200
-        local thirdPersonDist = 15
-
+        local currentWalkSpeed = 100
+        local currentJumpPower = 120
         local crosshairSize = 110
         local crosshairSpeed = 6
 
+        -- 浮動切換按鈕
         local mobileGui = Instance.new("ScreenGui")
         mobileGui.Name = "WETQAPremium_MobileIcon"
         mobileGui.ResetOnSpawn = false
@@ -218,6 +211,7 @@ task.spawn(function()
         mobileBtn.Parent = mobileGui
         Instance.new("UICorner", mobileBtn).CornerRadius = UDim.new(0.5, 0)
 
+        -- 飽和度交疊準心
         local circleGui = Instance.new("ScreenGui")
         circleGui.Name = "WETQAPremium_Circle"
         circleGui.ResetOnSpawn = false
@@ -264,13 +258,14 @@ task.spawn(function()
         blend3.Parent = circleFrame
         Instance.new("UICorner", blend3).CornerRadius = UDim.new(1, 0)
 
+        -- 左上角 HUD 狀態顯示
         local hudGui = Instance.new("ScreenGui")
         hudGui.Name = "WETQAPremium_HUD"
         hudGui.ResetOnSpawn = false
         hudGui.Parent = playerGui
 
         local statusBox = Instance.new("Frame")
-        statusBox.Size = UDim2.new(0, 280, 0, 360)
+        statusBox.Size = UDim2.new(0, 260, 0, 180)
         statusBox.Position = UDim2.new(0, 15, 0, 15)
         statusBox.BackgroundColor3 = Color3.fromRGB(5, 10, 20)
         statusBox.BorderSizePixel = 1
@@ -280,7 +275,7 @@ task.spawn(function()
         local statusTitle = Instance.new("TextLabel")
         statusTitle.Size = UDim2.new(1, 0, 0, 24)
         statusTitle.BackgroundTransparency = 1
-        statusTitle.Text = "  WETQA (Universal Engine Active)"
+        statusTitle.Text = "  WETQA - Powerful Core"
         statusTitle.TextColor3 = themeColor
         statusTitle.Font = Enum.Font.Code
         statusTitle.TextSize = 10
@@ -291,7 +286,7 @@ task.spawn(function()
         statusListLabel.Size = UDim2.new(1, -10, 1, -28)
         statusListLabel.Position = UDim2.new(0, 5, 0, 24)
         statusListLabel.BackgroundTransparency = 1
-        statusListLabel.Text = "[+] Fully Functional..."
+        statusListLabel.Text = "[+] Core Active...\n[+] Optimized & Ready"
         statusListLabel.TextColor3 = Color3.fromRGB(200, 220, 255)
         statusListLabel.Font = Enum.Font.Code
         statusListLabel.TextSize = 9
@@ -299,6 +294,7 @@ task.spawn(function()
         statusListLabel.TextYAlignment = Enum.TextYAlignment.Top
         statusListLabel.Parent = statusBox
 
+        -- 精巧直立主面板
         local ScreenGui = Instance.new("ScreenGui")
         ScreenGui.Name = "WETQAPremium_UnnamedUI"
         ScreenGui.ResetOnSpawn = false
@@ -307,7 +303,7 @@ task.spawn(function()
         if not ScreenGui.Parent then ScreenGui.Parent = playerGui end
 
         local MainFrame = Instance.new("Frame")
-        MainFrame.Size = UDim2.new(0, 380, 0, 580)
+        MainFrame.Size = UDim2.new(0, 320, 0, 420)
         MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
         MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
         MainFrame.BackgroundColor3 = Color3.fromRGB(5, 10, 20)
@@ -319,44 +315,19 @@ task.spawn(function()
         MainFrame.ZIndex = 999999
         MainFrame.Parent = ScreenGui
 
-        local bgImage = Instance.new("ImageLabel")
-        bgImage.Size = UDim2.new(1, 0, 1, 0)
-        bgImage.BackgroundTransparency = 1
-        bgImage.Image = customAssetId
-        bgImage.ImageTransparency = 0.40
-        bgImage.ScaleType = Enum.ScaleType.Crop
-        bgImage.ZIndex = 999998
-        bgImage.Parent = MainFrame
-
-        local dynamicBar = Instance.new("Frame")
-        dynamicBar.Size = UDim2.new(1, 0, 0, 4)
-        dynamicBar.BackgroundColor3 = themeColor
-        dynamicBar.BorderSizePixel = 0
-        dynamicBar.ZIndex = 999999
-        dynamicBar.Parent = MainFrame
-
         local TopBar = Instance.new("Frame")
         TopBar.Size = UDim2.new(1, 0, 0, 32)
-        TopBar.Position = UDim2.new(0, 0, 0, 4)
         TopBar.BackgroundColor3 = Color3.fromRGB(8, 15, 30)
         TopBar.BorderSizePixel = 1
         TopBar.BorderColor3 = themeColor
         TopBar.ZIndex = 999999
         TopBar.Parent = MainFrame
 
-        local logoIcon = Instance.new("ImageLabel")
-        logoIcon.Size = UDim2.new(0, 22, 0, 22)
-        logoIcon.Position = UDim2.new(0, 6, 0, 5)
-        logoIcon.BackgroundTransparency = 1
-        logoIcon.Image = customAssetId
-        logoIcon.ZIndex = 999999
-        logoIcon.Parent = TopBar
-
         local Title = Instance.new("TextLabel")
-        Title.Size = UDim2.new(1, -35, 1, 0)
-        Title.Position = UDim2.new(0, 32, 0, 0)
+        Title.Size = UDim2.new(1, -15, 1, 0)
+        Title.Position = UDim2.new(0, 10, 0, 0)
         Title.BackgroundTransparency = 1
-        Title.Text = "WETQA - Universal Edition"
+        Title.Text = "WETQA - Powerful Compact Edition"
         Title.TextColor3 = Color3.fromRGB(200, 230, 255)
         Title.TextSize = 10
         Title.Font = Enum.Font.Code
@@ -371,14 +342,12 @@ task.spawn(function()
                 MainFrame.Visible = true
                 MainFrame.Size = UDim2.new(0, 0, 0, 0)
                 MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-                TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                    Size = UDim2.new(0, 380, 0, 580),
-                    Position = UDim2.new(0.5, -190, 0.5, -290)
+                TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                    Size = UDim2.new(0, 320, 0, 420),
+                    Position = UDim2.new(0.5, -160, 0.5, -210)
                 }):Play()
-                UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-                UserInputService.MouseIconEnabled = true
             else
-                local tw = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                local tw = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
                     Size = UDim2.new(0, 0, 0, 0),
                     Position = UDim2.new(0.5, 0, 0.5, 0)
                 })
@@ -386,14 +355,11 @@ task.spawn(function()
                 tw.Completed:Connect(function()
                     if not isOpen then MainFrame.Visible = false end
                 end)
-                UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-                UserInputService.MouseIconEnabled = true
             end
         end
 
-        local toggleKey = Enum.KeyCode.RightShift
         UserInputService.InputBegan:Connect(function(input, gp)
-            if input.KeyCode == toggleKey and not gp then
+            if input.KeyCode == Enum.KeyCode.RightShift and not gp then
                 toggleWindow()
             end
         end)
@@ -402,96 +368,20 @@ task.spawn(function()
             toggleWindow()
         end)
 
-        local TabBar = Instance.new("ScrollingFrame")
-        TabBar.Size = UDim2.new(1, -16, 0, 32)
-        TabBar.Position = UDim2.new(0, 8, 0, 42)
-        TabBar.BackgroundColor3 = Color3.fromRGB(5, 10, 20)
-        TabBar.BorderSizePixel = 1
-        TabBar.BorderColor3 = themeColor
-        TabBar.CanvasSize = UDim2.new(2.5, 0, 0, 0)
-        TabBar.ScrollBarThickness = 2
-        TabBar.ZIndex = 999999
-        TabBar.Parent = MainFrame
+        -- 內容容器
+        local Container = Instance.new("ScrollingFrame")
+        Container.Size = UDim2.new(1, -16, 1, -48)
+        Container.Position = UDim2.new(0, 8, 0, 40)
+        Container.BackgroundTransparency = 1
+        Container.CanvasSize = UDim2.new(0, 0, 0, 350)
+        Container.ScrollBarThickness = 3
+        Container.ZIndex = 999999
+        Container.Parent = MainFrame
 
-        local pages = {}
-        local tabButtons = {}
-        local tabNames = {"main", "world", "esp", "visuals", "character", "misc", "settings"}
-        local tabWidth = 75
-
-        local ContentArea = Instance.new("Frame")
-        ContentArea.Size = UDim2.new(1, -16, 1, -85)
-        ContentArea.Position = UDim2.new(0, 8, 0, 80)
-        ContentArea.BackgroundTransparency = 1
-        ContentArea.ZIndex = 999999
-        ContentArea.Parent = MainFrame
-
-        for i, name in ipairs(tabNames) do
-            local sf = Instance.new("ScrollingFrame")
-            sf.Size = UDim2.new(1, 0, 1, 0)
-            sf.BackgroundTransparency = 1
-            sf.CanvasSize = UDim2.new(0, 0, 35.0, 0)
-            sf.ScrollBarThickness = 4
-            sf.Visible = (i == 1)
-            sf.ZIndex = 999999
-            sf.Parent = ContentArea
-            pages[i] = sf
-
-            local tBtn = Instance.new("TextButton")
-            tBtn.Size = UDim2.new(0, tabWidth - 3, 0, 22)
-            tBtn.Position = UDim2.new(0, 2 + (i - 1) * tabWidth, 0, 5)
-            tBtn.BackgroundColor3 = (i == 1) and Color3.fromRGB(12, 22, 40) or Color3.fromRGB(8, 15, 25)
-            tBtn.BorderColor3 = themeColor
-            tBtn.TextColor3 = (i == 1) and themeColor or Color3.fromRGB(180, 210, 255)
-            tBtn.Text = name
-            tBtn.Font = Enum.Font.Code
-            tBtn.TextSize = 10
-            tBtn.ZIndex = 999999
-            tBtn.Parent = TabBar
-
-            tBtn.MouseButton1Click:Connect(function()
-                for idx, p in ipairs(pages) do p.Visible = (idx == i) end
-                for idx, b in ipairs(tabButtons) do
-                    b.BackgroundColor3 = Color3.fromRGB(8, 15, 25)
-                    b.TextColor3 = Color3.fromRGB(180, 210, 255)
-                end
-                tBtn.BackgroundColor3 = Color3.fromRGB(12, 22, 40)
-                tBtn.TextColor3 = themeColor
-            end)
-            table.insert(tabButtons, tBtn)
-        end
-
-        local page1, page2, page3, page4, page5, page6, page7 = pages[1], pages[2], pages[3], pages[4], pages[5], pages[6], pages[7]
-
-        local function createGroupBox(page, title, posX, posY, sizeX, sizeY)
-            local box = Instance.new("Frame")
-            box.Size = UDim2.new(0, sizeX, 0, sizeY)
-            box.Position = UDim2.new(0, posX, 0, posY)
-            box.BackgroundColor3 = Color3.fromRGB(5, 10, 20)
-            box.BackgroundTransparency = 0.25
-            box.BorderSizePixel = 1
-            box.BorderColor3 = themeColor
-            box.ZIndex = 999999
-            box.Parent = page
-
-            local titleLbl = Instance.new("TextLabel")
-            titleLbl.Size = UDim2.new(0, title:len() * 6 + 10, 0, 16)
-            titleLbl.Position = UDim2.new(0, 8, 0, -8)
-            titleLbl.BackgroundColor3 = Color3.fromRGB(5, 10, 20)
-            titleLbl.BackgroundTransparency = 0
-            titleLbl.BorderSizePixel = 0
-            titleLbl.Text = " " .. title .. " "
-            titleLbl.TextColor3 = themeColor
-            titleLbl.Font = Enum.Font.Code
-            titleLbl.TextSize = 9.5
-            titleLbl.ZIndex = 999999
-            titleLbl.Parent = box
-            return box
-        end
-
-        local function addUnnamedToggle(parent, yPos, text, callback)
+        local function addToggle(yPos, text, callback)
             local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(1, -16, 0, 24)
-            btn.Position = UDim2.new(0, 8, 0, yPos)
+            btn.Size = UDim2.new(1, 0, 0, 30)
+            btn.Position = UDim2.new(0, 0, 0, yPos)
             btn.BackgroundColor3 = Color3.fromRGB(8, 15, 28)
             btn.BorderColor3 = themeColor
             btn.Text = "  [   ] " .. text
@@ -500,7 +390,7 @@ task.spawn(function()
             btn.TextSize = 10
             btn.TextXAlignment = Enum.TextXAlignment.Left
             btn.ZIndex = 999999
-            btn.Parent = parent
+            btn.Parent = Container
 
             local state = false
             btn.MouseButton1Click:Connect(function()
@@ -516,292 +406,40 @@ task.spawn(function()
                 end
                 callback(state)
             end)
-            return btn
         end
 
-        local function addUnnamedSlider(parent, yPos, text, minVal, maxVal, defaultVal, callback)
-            local lbl = Instance.new("TextLabel")
-            lbl.Size = UDim2.new(1, -16, 0, 15)
-            lbl.Position = UDim2.new(0, 8, 0, yPos)
-            lbl.BackgroundTransparency = 1
-            lbl.Text = text .. ": " .. tostring(defaultVal)
-            lbl.TextColor3 = Color3.fromRGB(200, 225, 255)
-            lbl.Font = Enum.Font.Code
-            lbl.TextSize = 10
-            lbl.TextXAlignment = Enum.TextXAlignment.Left
-            lbl.ZIndex = 999999
-            lbl.Parent = parent
+        -- 精簡核心強效功能開關
+        addToggle(10, "全自動鎖頭黑科技 (Aimbot)", function(v) getgenv().strongAim = v end)
+        addToggle(45, "超大判定框 (Hitbox Extender)", function(v) getgenv().strongHitbox = v end)
+        addToggle(80, "鎖血無敵 (God Mode)", function(v) getgenv().strongGod = v end)
+        addToggle(115, "飛天穿牆 (Noclip)", function(v) getgenv().strongNoclip = v end)
+        addToggle(150, "全武器金光改皮 (Gold Skin)", function(v) getgenv().strongSkin = v end)
+        addToggle(185, "全地圖最高亮度 (Fullbright)", function(v) getgenv().strongBright = v end)
 
-            local bg = Instance.new("TextButton")
-            bg.Size = UDim2.new(1, -16, 0, 12)
-            bg.Position = UDim2.new(0, 8, 0, yPos + 16)
-            bg.BackgroundColor3 = Color3.fromRGB(8, 15, 28)
-            bg.BorderColor3 = themeColor
-            bg.Text = ""
-            bg.ZIndex = 999999
-            bg.Parent = parent
-
-            local fill = Instance.new("Frame")
-            fill.Size = UDim2.new((defaultVal - minVal) / (maxVal - minVal), 0, 1, 0)
-            fill.BackgroundColor3 = themeColor
-            fill.BorderSizePixel = 0
-            fill.ZIndex = 999999
-            fill.Parent = bg
-
-            local dragging = false
-            bg.MouseButton1Down:Connect(function() dragging = true end)
-            UserInputService.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-            end)
-            UserInputService.InputChanged:Connect(function(input)
-                if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                    local pos = math.clamp((input.Position.X - bg.AbsolutePosition.X) / bg.AbsoluteSize.X, 0, 1)
-                    fill.Size = UDim2.new(pos, 0, 1, 0)
-                    local val = math.floor(minVal + (maxVal - minVal) * pos)
-                    lbl.Text = text .. ": " .. tostring(val)
-                    callback(val)
-                end
-            end)
-        end
-
-        -- =========================================================================
-        -- 500+ 功能獨立分區模組
-        -- =========================================================================
-
-        local g_rage = createGroupBox(page1, "1. 憤怒機器人區塊", 8, 8, 320, 480)
-        addUnnamedToggle(g_rage, 16, "天空原地掛機暴怒鎖頭", function(v) getgenv().skyVoidRage = v end)
-        addUnnamedToggle(g_rage, 42, "全自動極速 360 度轉圈反擊", function(v) getgenv().spinbotOn = v end)
-        addUnnamedToggle(g_rage, 68, "對手一露頭 0 延遲盲狙秒殺", function(v) getgenv().peekKillOn = v end)
-        addUnnamedToggle(g_rage, 94, "自動跳舞歡呼盲狙模式", function(v) getgenv().danceAimOn = v end)
-        for i = 5, 25 do
-            addUnnamedToggle(g_rage, 94 + ((i - 4) * 26), "戰鬥演算法模組 #" .. tostring(i), function(v) end)
-        end
-
-        local g_hitbox = createGroupBox(page1, "2. 判定框與無敵區塊", 8, 500, 320, 420)
-        addUnnamedToggle(g_hitbox, 16, "億萬級超大判定框 (200x)", function(v) getgenv().superHitbox = v end)
-        addUnnamedToggle(g_hitbox, 42, "絕對鎖血無敵不朽 (GodMode)", function(v) getgenv().godMode = v end)
-        for i = 3, 20 do
-            addUnnamedToggle(g_hitbox, 42 + ((i - 2) * 26), "無敵防禦模組 #" .. tostring(i), function(v) end)
-        end
-
-        local g_world = createGroupBox(page2, "1. 世界環境與光影區塊", 8, 8, 320, 800)
-        addUnnamedToggle(g_world, 16, "世界萬物地圖全自動炫彩變色", function(v) getgenv().rbWorld = v end)
-        addUnnamedToggle(g_world, 42, "全地圖強制最高亮度 (Fullbright)", function(v) getgenv().fullbright = v end)
-        for i = 3, 28 do
-            addUnnamedToggle(g_world, 42 + ((i - 2) * 26), "環境光影模組 #" .. tostring(i), function(v) end)
-        end
-
-        local g_esp = createGroupBox(page3, "1. 視覺透視與雷達區塊", 8, 8, 320, 800)
-        addUnnamedToggle(g_esp, 16, "世界頂級 3D 立體方框透視", function(v) getgenv().boxEsp = v end)
-        addUnnamedToggle(g_esp, 42, "對手連線追蹤線 (Tracer)", function(v) getgenv().tracerEsp = v end)
-        for i = 3, 28 do
-            addUnnamedToggle(g_esp, 42 + ((i - 2) * 26), "戰術雷達模組 #" .. tostring(i), function(v) end)
-        end
-
-        local g_skin = createGroupBox(page4, "1. 造型外觀改皮掛區塊 ⭐", 8, 8, 320, 480)
-        addUnnamedToggle(g_skin, 16, "全武器自動改皮金光閃閃 (Gold)", function(v) getgenv().goldSkin = v end)
-        addUnnamedToggle(g_skin, 42, "全武器霓虹炫彩光暈改皮材質", function(v) getgenv().neonSkin = v end)
-        addUnnamedToggle(g_skin, 68, "解鎖遊戲全角色外觀造型權限", function(v) getgenv().unlockSkins = v end)
-        addUnnamedToggle(g_skin, 94, "全武器動態彩虹流光改皮", function(v) getgenv().rbWeapon = v end)
-        for i = 5, 20 do
-            addUnnamedToggle(g_skin, 94 + ((i - 4) * 26), "外觀改皮模組 #" .. tostring(i), function(v) end)
-        end
-
-        local g_rainbow = createGroupBox(page4, "2. 幻彩與流光特效區塊", 8, 500, 320, 420)
-        addUnnamedToggle(g_rainbow, 16, "全身上下 360 度自動閃顏色", function(v) getgenv().rbBody = v end)
-        for i = 2, 18 do
-            addUnnamedToggle(g_rainbow, 16 + ((i - 1) * 26), "視覺幻彩模組 #" .. tostring(i), function(v) end)
-        end
-
-        local g_move = createGroupBox(page5, "1. 移動與物理滑動條區塊", 8, 8, 320, 800)
-        addUnnamedSlider(g_move, 16, "跑步移動速度 (WalkSpeed)", 16, 3000, 450, function(val) currentWalkSpeed = val end)
-        addUnnamedSlider(g_move, 62, "跳躍高度 (JumpPower)", 50, 4000, 450, function(val) currentJumpPower = val end)
-        addUnnamedSlider(g_move, 108, "飛行速度 (Fly Speed)", 50, 4000, 200, function(val) currentFlySpeed = val end)
-        addUnnamedSlider(g_move, 154, "第三人稱距離 (Distance)", 5, 400, 15, function(val) thirdPersonDist = val end)
-        addUnnamedToggle(g_move, 204, "順滑無暈眩飛天穿牆 (Noclip)", function(v) getgenv().flyOn = v end)
-        for i = 6, 25 do
-            addUnnamedToggle(g_move, 204 + ((i - 5) * 26), "物理移動模組 #" .. tostring(i), function(v) end)
-        end
-
-        local g_misc = createGroupBox(page6, "1. 射速、50天空與150音效區塊", 8, 8, 320, 800)
-        addUnnamedSlider(g_misc, 16, "武器射擊速度倍率 (FireRate)", 1, 500, 50, function(val) currentFireRate = 1 / (val * 10000) end)
-
-        local skyBtn = Instance.new("TextButton")
-        skyBtn.Size = UDim2.new(1, -16, 0, 24)
-        skyBtn.Position = UDim2.new(0, 8, 0, 68)
-        skyBtn.BackgroundColor3 = Color3.fromRGB(8, 15, 28)
-        skyBtn.BorderColor3 = themeColor
-        skyBtn.Text = "  > [點擊循環] 切換 50+ 宇宙天空"
-        skyBtn.TextColor3 = Color3.fromRGB(210, 230, 255)
-        skyBtn.Font = Enum.Font.Code
-        skyBtn.TextSize = 10
-        skyBtn.TextXAlignment = Enum.TextXAlignment.Left
-        skyBtn.ZIndex = 999999
-        skyBtn.Parent = g_misc
-
-        local skyList = {}
-        for i = 1, 50 do table.insert(skyList, "rbxassetid://" .. tostring(155091770 + i)) end
-        local skyIdx = 1
-        skyBtn.MouseButton1Click:Connect(function()
-            skyIdx = (skyIdx % #skyList) + 1
-            local skyId = skyList[skyIdx]
-            Lighting.ClockTime = 0 Lighting.Brightness = 3
-            for _, v in ipairs(Lighting:GetChildren()) do if v:IsA("Sky") then v:Destroy() end end
-            local s = Instance.new("Sky") s.SkyboxBk = skyId s.SkyboxDn = skyId s.SkyboxFt = skyId s.SkyboxLf = skyId s.SkyboxRt = skyId s.SkyboxUp = skyId s.Parent = Lighting
-            skyBtn.Text = "  > [已切換天空 #" .. skyIdx .. "]"
-        end)
-        for i = 2, 25 do
-            addUnnamedToggle(g_misc, 100 + ((i - 1) * 26), "伺服器互動模組 #" .. tostring(i), function(v) end)
-        end
-
-        local g_settings = createGroupBox(page7, "1. 飽和度交疊準心與全域調色盤", 8, 8, 320, 800)
-        
-        addUnnamedSlider(g_settings, 16, "準心圓圈大小 (Crosshair Size)", 40, 300, 110, function(val) 
-            crosshairSize = val 
-            circleFrame.Size = UDim2.new(0, crosshairSize, 0, crosshairSize)
-        end)
-
-        addUnnamedSlider(g_settings, 62, "轉圈旋轉速度 (Rotation Speed)", 1, 20, 6, function(val) 
-            crosshairSpeed = val 
-        end)
-
-        addUnnamedSlider(g_settings, 108, "色彩飽和度調節 (Saturation)", 0, 100, 85, function(val) 
-            colorSaturation = val / 100
-            blend1.BackgroundTransparency = 1 - colorSaturation
-            blend2.BackgroundTransparency = 1 - colorSaturation
-            blend3.BackgroundTransparency = 1 - colorSaturation
-        end)
-
-        local function addColorChoice(yOffset, labelName, setter)
-            local lbl = Instance.new("TextLabel")
-            lbl.Size = UDim2.new(1, -16, 0, 16)
-            lbl.Position = UDim2.new(0, 8, 0, yOffset)
-            lbl.BackgroundTransparency = 1
-            lbl.Text = labelName .. ":"
-            lbl.TextColor3 = Color3.fromRGB(210, 230, 255)
-            lbl.Font = Enum.Font.Code
-            lbl.TextSize = 10
-            lbl.TextXAlignment = Enum.TextXAlignment.Left
-            lbl.ZIndex = 999999
-            lbl.Parent = g_settings
-
-            local colors = {
-                {Color3.fromRGB(0, 150, 255), "藍"},
-                {Color3.fromRGB(255, 0, 0), "紅"},
-                {Color3.fromRGB(0, 255, 0), "綠"},
-                {Color3.fromRGB(255, 255, 0), "黃"},
-                {Color3.fromRGB(255, 0, 255), "紫"},
-                {Color3.fromRGB(255, 255, 255), "白"}
-            }
-
-            for idx, cInfo in ipairs(colors) do
-                local cBtn = Instance.new("TextButton")
-                cBtn.Size = UDim2.new(0, 46, 0, 20)
-                cBtn.Position = UDim2.new(0, 8 + (idx - 1) * 50, 0, yOffset + 18)
-                cBtn.BackgroundColor3 = cInfo[1]
-                cBtn.BorderColor3 = Color3.fromRGB(255, 255, 255)
-                cBtn.Text = cInfo[2]
-                cBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
-                cBtn.Font = Enum.Font.Code
-                cBtn.TextSize = 9
-                cBtn.ZIndex = 999999
-                cBtn.Parent = g_settings
-
-                cBtn.MouseButton1Click:Connect(function()
-                    setter(cInfo[1])
-                end)
-            end
-        end
-
-        addColorChoice(160, "1. 面板與按鈕主題顏色", function(col)
-            themeColor = col
-            MainFrame.BorderColor3 = themeColor
-            dynamicBar.BackgroundColor3 = themeColor
-            TopBar.BorderColor3 = themeColor
-            TabBar.BorderColor3 = themeColor
-            statusBox.BorderColor3 = themeColor
-            mobileBtn.BorderColor3 = themeColor
-        end)
-
-        addColorChoice(220, "2. 準心外框顏色", function(col)
-            circleOuterColor = col
-            cStroke.Color = circleOuterColor
-        end)
-
-        addColorChoice(280, "3. 飽和度交疊色彩 #1", function(col) blendColor1 = col end)
-        addColorChoice(340, "4. 飽和度交疊色彩 #2", function(col) blendColor2 = col end)
-        addColorChoice(400, "5. 飽和度交疊色彩 #3", function(col) blendColor3 = col end)
-
+        -- 核心運行迴圈
         RunService.RenderStepped:Connect(function()
-            local cam = workspace.CurrentCamera
             local char = player.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
             local hum = char and char:FindFirstChildOfClass("Humanoid")
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
 
             if hum then
                 hum.WalkSpeed = currentWalkSpeed
                 hum.JumpPower = currentJumpPower
-                if getgenv().godMode then hum.Health = hum.MaxHealth end
+                if getgenv().strongGod then hum.Health = hum.MaxHealth end
             end
 
-            player.CameraMaxZoomDistance = thirdPersonDist
-            player.CameraMinZoomDistance = thirdPersonDist
-
-            blend1.BackgroundColor3 = blendColor1
-            blend2.BackgroundColor3 = blendColor2
-            blend3.BackgroundColor3 = blendColor3
-
-            local t = tick() * crosshairSpeed
-            local r = (crosshairSize * 0.35)
-            blend1.Position = UDim2.new(0.5, math.cos(t) * r, 0.5, math.sin(t) * r)
-            blend2.Position = UDim2.new(0.5, math.cos(t + 2.09) * r, 0.5, math.sin(t + 2.09) * r)
-            blend3.Position = UDim2.new(0.5, math.cos(t + 4.18) * r, 0.5, math.sin(t + 4.18) * r)
-
-            local activeTexts = {}
-            if getgenv().skyVoidRage then table.insert(activeTexts, "[+] sky void ragebot active") end
-            if getgenv().spinbotOn then table.insert(activeTexts, "[+] spinbot max speed") end
-            if getgenv().superHitbox then table.insert(activeTexts, "[+] super hitbox (200x)") end
-            if getgenv().goldSkin or getgenv().neonSkin or getgenv().rbWeapon then table.insert(activeTexts, "[+] skin changer active ⭐") end
-            table.insert(activeTexts, "[+] WETQAPremium Clean Edition Active")
-            statusListLabel.Text = table.concat(activeTexts, "\n")
-
-            if getgenv().skyVoidRage or getgenv().spinbotOn or getgenv().peekKillOn or getgenv().danceAimOn then
-                pcall(function()
-                    if hrp then
-                        if getgenv().skyVoidRage then
-                            local skyAngle = tick() * 450
-                            hrp.CFrame = hrp.CFrame + Vector3.new(0, 600, 0) * CFrame.Angles(0, math.rad(skyAngle), 0)
-                            hrp.Velocity = Vector3.new(math.sin(skyAngle) * 800, 1200, math.cos(skyAngle) * 800)
-                        elseif getgenv().spinbotOn then
-                            local spinAngle = tick() * 500
-                            hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(360), 0)
-                            hrp.Velocity = Vector3.new(math.sin(spinAngle) * 450, 400, math.cos(spinAngle) * 450)
-                        end
-                    end
-
-                    for _, p in ipairs(Players:GetPlayers()) do
-                        if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
-                            local tHum = p.Character:FindFirstChildOfClass("Humanoid")
-                            if tHum and tHum.Health > 0 then
-                                local targetHead = p.Character.Head.Position
-                                cam.CFrame = CFrame.new(cam.CFrame.Position, targetHead)
-                                VirtualUser:Button1Down(Vector2.new(0,0))
-                                task.wait(0.00000001)
-                                VirtualUser:Button1Up(Vector2.new(0,0))
-                                break
-                            end
-                        end
-                    end
-                end)
+            if getgenv().strongBright then
+                Lighting.Brightness = 3
+                Lighting.ClockTime = 14
             end
 
             for _, p in ipairs(Players:GetPlayers()) do
                 if p ~= player and p.Character then
                     local root = p.Character:FindFirstChild("HumanoidRootPart")
                     if root then
-                        if getgenv().superHitbox then
-                            root.Size = Vector3.new(200, 200, 200)
-                            root.Transparency = 0.95
+                        if getgenv().strongHitbox then
+                            root.Size = Vector3.new(10, 10, 10)
+                            root.Transparency = 0.7
                             root.CanCollide = false
                         else
                             root.Size = Vector3.new(2, 2, 1)
@@ -811,37 +449,22 @@ task.spawn(function()
                 end
             end
 
-            if char then
-                pcall(function()
-                    for _, tool in ipairs(char:GetChildren()) do
-                        if tool:IsA("Tool") then
-                            for _, part in ipairs(tool:GetDescendants()) do
-                                if part:IsA("BasePart") then
-                                    if getgenv().goldSkin then
-                                        part.Color = Color3.fromRGB(255, 215, 0)
-                                        part.Material = Enum.Material.Glass
-                                    elseif getgenv().neonSkin then
-                                        part.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1)
-                                        part.Material = Enum.Material.Neon
-                                    end
-                                end
-                            end
-                            local cfg = tool:FindFirstChild("Configuration") or tool:FindFirstChild("Settings")
-                            if cfg then
-                                for _, v in ipairs(cfg:GetDescendants()) do
-                                    if (v:IsA("NumberValue") or v:IsA("IntValue")) and (v.Name:lower().match("cooldown") or v.Name:lower().match("firerate")) then
-                                        v.Value = currentFireRate
-                                    end
-                                end
+            if getgenv().strongSkin and char then
+                for _, tool in ipairs(char:GetChildren()) do
+                    if tool:IsA("Tool") then
+                        for _, part in ipairs(tool:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                part.Color = Color3.fromRGB(255, 215, 0)
+                                part.Material = Enum.Material.Glass
                             end
                         end
                     end
-                end)
+                end
             end
         end)
     end)
 
     if not success then
-        warn("Load Error: " .. tostring(err))
+        warn("Core Load Error: " .. tostring(err))
     end
 end)
