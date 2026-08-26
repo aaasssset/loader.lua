@@ -1,5 +1,5 @@
 -- ==============================================================================
--- Roblox 究極戰鬥核心面板 + 內嵌分頁與「開啟改皮面板按鈕」完整版
+-- Roblox 究極戰鬥核心面板 + 內嵌改皮按鈕 (極致平滑・不鎖死完美版)
 -- ==============================================================================
 
 -- ==============================================================================
@@ -517,7 +517,7 @@ local function openCosmeticChangerGUI()
     title.Size = UDim2.new(1, 0, 0, 28)
     title.BackgroundColor3 = PANEL
     title.BorderSizePixel = 0
-    title.Text = "專業武器改皮面板 (點擊圖示套用外觀)"
+    title.Text = "改皮"
     title.TextColor3 = TEXT
     title.Font = UIFONT
     title.TextSize = 13
@@ -802,13 +802,13 @@ end
 
 
 -- ==============================================================================
--- PART 2: 戰鬥核心面板 + 內嵌「開啟改皮面板」按鈕 (LinoriaLib 完整大合集)
+-- PART 2: 戰鬥核心面板 (極致平滑自瞄、2D透視與內嵌按鈕)
 -- ==============================================================================
 local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 
 local CombatWindow = Library:CreateWindow({
-    Title = 'Roblox 究極戰鬥核心面板 | 內嵌改皮按鈕版',
+    Title = 'WETQA面板 | discord.gg/GbrS6eTsfq',
     Center = true,
     AutoShow = true,
     TabPadding = 8,
@@ -819,13 +819,13 @@ local CombatTabs = {
     Combat = CombatWindow:AddTab('combat'),
     Visuals = CombatWindow:AddTab('visuals'),
     Character = CombatWindow:AddTab('character'),
-    Skins = CombatWindow:AddTab('skins (改皮系統)'), -- 專屬改皮分頁
+    Skins = CombatWindow:AddTab('skins (改皮系統)'),
     Misc = CombatWindow:AddTab('misc'),
     Settings = CombatWindow:AddTab('settings')
 }
 
 -- 各分頁群組配置
-local AimGroup = CombatTabs.Combat:AddLeftGroupbox('Aim, Smooth Lock & Silent Aim (平滑鎖頭)')
+local AimGroup = CombatTabs.Combat:AddLeftGroupbox('Aim & Smooth Lock (平滑鎖頭)')
 local WeaponGroup = CombatTabs.Combat:AddRightGroupbox('Weapon & Wallbang')
 
 local ESPGroup = CombatTabs.Visuals:AddLeftGroupbox('2D Box ESP (標準2D方格透視)')
@@ -858,12 +858,12 @@ local ChatSystemGroup = CombatTabs.Misc:AddLeftGroupbox('Universal Chat System (
 local NotifyGroup = CombatTabs.Misc:AddRightGroupbox('Notifications & Alerts')
 local SettingsGroup = CombatTabs.Settings:AddLeftGroupbox('UI Settings & Keybinds')
 
--- 變數初始化
+-- 變數初始化 (平滑度預設調高至 15，操作更柔和自然、絕對不卡死)
 local SmoothLockEnabled = false
 local SilentAimEnabled = false
 local ShowFOV = false
 local FOVRadius = 150
-local SmoothnessValue = 5
+local SmoothnessValue = 15 
 local Box2DESPEnabled = false
 local BoxColor = Color3.fromRGB(255, 0, 0)
 
@@ -936,8 +936,8 @@ local function SendUniversalChatMessage(msg)
     end)
 end
 
-AimGroup:AddToggle('SmoothLock', { Text = 'smooth lock head (平滑鎖頭)', Default = false }):OnChanged(function(v) SmoothLockEnabled = v end)
-AimGroup:AddSlider('Smoothness', { Text = 'smoothness: 5', Default = 5, Min = 1, Max = 20, Rounding = 0 }):OnChanged(function(v) SmoothnessValue = v end)
+AimGroup:AddToggle('SmoothLock', { Text = 'smooth lock head (極致平滑鎖頭)', Default = false }):OnChanged(function(v) SmoothLockEnabled = v end)
+AimGroup:AddSlider('Smoothness', { Text = 'smoothness: 15 (平滑度)', Default = 15, Min = 5, Max = 50, Rounding = 0 }):OnChanged(function(v) SmoothnessValue = v end)
 AimGroup:AddToggle('SilentAimCurving', { Text = 'silent aim / curving bullets (子彈轉彎)', Default = false }):OnChanged(function(v) SilentAimEnabled = v end)
 AimGroup:AddToggle('ShowFOV', { Text = 'show fov (顯示自瞄範圍圓圈)', Default = false }):OnChanged(function(v) ShowFOV = v end)
 AimGroup:AddSlider('FOVRadius', { Text = 'radius: 150px', Default = 150, Min = 50, Max = 500, Rounding = 0 }):OnChanged(function(v)
@@ -1001,6 +1001,7 @@ RunService.RenderStepped:Connect(function(dt)
         end
     end
 
+    -- 極致平滑過渡核心（Lerp 係數大幅拉高，滑順不生硬）
     if SmoothLockEnabled or SilentAimEnabled then
         local closestTarget = nil
         local shortestDist = math.huge
@@ -1096,7 +1097,7 @@ end)
 ChatSystemGroup:AddInput('ChatSpamInput', { Default = 'Roblox Universal Hub Active!', Numeric = false, Finished = false, Text = 'Custom Chat Message', Callback = function(v) ChatSpamMessage = v end })
 ChatSystemGroup:AddSlider('ChatDelaySlider', { Text = 'spam delay: 1.5s', Default = 1.5, Min = 0.5, Max = 5.0, Rounding = 1 }):OnChanged(function(v) ChatSpamDelay = v end)
 ChatSystemGroup:AddButton('Send Once', function() SendUniversalChatMessage(ChatSpamMessage) Library:Notify("訊息已發送", 2) end)
-NotifyGroup:AddButton('Show Welcome Alert', function() Library:Notify("內嵌改皮按鈕版本載入成功！", 4) end)
+NotifyGroup:AddButton('Show Welcome Alert', function() Library:Notify("極致平滑版本載入成功！", 4) end)
 
 SettingsGroup:AddLabel('Menu Binding'):AddKeyPicker('MenuKey', { Default = 'LeftShift', NoUI = true, Text = 'Toggle UI' })
-Library:Notify("載入完畢！按 LeftShift 開關主面板，前往「skins (改皮系統)」點擊按鈕即可開啟改皮視窗。", 6)
+Library:Notify("載入完畢！平滑度已預設調高至 15，操作手感更自然、不卡死。", 6)
