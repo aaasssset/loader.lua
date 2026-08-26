@@ -1,11 +1,11 @@
 -- ==============================================================================
--- Roblox 究極戰鬥核心面板 (2D方格透視、FOV圓圈、直接強鎖頭與子彈轉彎修復版)
+-- Roblox 究極戰鬥核心面板 (平滑平緩鎖頭、2D方格透視、FOV圓圈與子彈轉彎版)
 -- ==============================================================================
 local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 
 local Window = Library:CreateWindow({
-    Title = 'WETQA面板 | discord.gg/GbrS6eTsfq',
+    Title = 'Roblox 究極戰鬥核心面板 | 平滑鎖頭與2D透視版',
     Center = true,
     AutoShow = true,
     TabPadding = 8,
@@ -24,7 +24,7 @@ local Tabs = {
 -- ------------------------------------------------------------------------------
 -- 各分頁群組配置
 -- ------------------------------------------------------------------------------
-local AimGroup = Tabs.Combat:AddLeftGroupbox('Aim, Hard Lock & Silent Aim (直接強鎖與子彈轉彎)')
+local AimGroup = Tabs.Combat:AddLeftGroupbox('Aim, Smooth Lock & Silent Aim (平滑鎖頭與子彈轉彎)')
 local WeaponGroup = Tabs.Combat:AddRightGroupbox('Weapon & Wallbang')
 
 local ESPGroup = Tabs.Visuals:AddLeftGroupbox('2D Box ESP (標準2D方格透視)')
@@ -48,10 +48,11 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
 -- 狀態變數
-local HardLockEnabled = false
+local SmoothLockEnabled = false
 local SilentAimEnabled = false
 local ShowFOV = false
 local FOVRadius = 150
+local SmoothnessValue = 5 -- 數值越大、轉過去越平滑、不卡死
 local Box2DESPEnabled = false
 local BoxColor = Color3.fromRGB(255, 0, 0)
 
@@ -128,10 +129,14 @@ local function SendUniversalChatMessage(msg)
 end
 
 ------------------------------------------------------------------------------
--- 1. COMBAT 分頁 (直接強鎖頭、子彈轉彎 Silent Aim、Show FOV)
+-- 1. COMBAT 分頁 (平滑鎖頭、平滑度調整、子彈轉彎 Silent Aim、Show FOV)
 ------------------------------------------------------------------------------
-AimGroup:AddToggle('HardLock', { Text = 'hard lock head (直接對著頭·最近優先)', Default = false }):OnChanged(function(v) 
-    HardLockEnabled = v 
+AimGroup:AddToggle('SmoothLock', { Text = 'smooth lock head (平滑鎖頭·不用鎖太緊)', Default = false }):OnChanged(function(v) 
+    SmoothLockEnabled = v 
+end)
+
+AimGroup:AddSlider('Smoothness', { Text = 'smoothness: 5 (平滑度)', Default = 5, Min = 1, Max = 20, Rounding = 0 }):OnChanged(function(v)
+    SmoothnessValue = v
 end)
 
 AimGroup:AddToggle('SilentAimCurving', { Text = 'silent aim / curving bullets (子彈轉彎追蹤)', Default = false }):OnChanged(function(v) 
@@ -181,7 +186,7 @@ HandsGroup:AddToggle('RemoveHands', { Text = 'remove hands (無手模式)', Defa
     end
 end)
 
--- 萬能即時渲染核心 (2D方格計算、FOV 圓圈、硬鎖頭與子彈轉彎)
+-- 萬能即時渲染核心 (2D方格計算、FOV 圓圈、平滑鎖頭與子彈轉彎)
 RunService.RenderStepped:Connect(function(dt)
     -- 1. Show FOV 圓圈渲染與動態色彩旋轉
     if ShowFOV then
@@ -197,7 +202,7 @@ RunService.RenderStepped:Connect(function(dt)
         FOVCircle.Visible = false
     end
 
-    -- 2. 2D 方格透視渲染核心 (確保所有敵人都會有方格包圍)
+    -- 2. 2D 方格透視渲染核心
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
             createPlayerESP(player)
@@ -234,8 +239,8 @@ RunService.RenderStepped:Connect(function(dt)
         end
     end
     
-    -- 3. 強力硬鎖頭與子彈轉彎 (Curving Bullets & Hard Lock)
-    if HardLockEnabled or SilentAimEnabled then
+    -- 3. 平滑鎖頭與子彈轉彎 (Smooth Lock & Curving Bullets)
+    if SmoothLockEnabled or SilentAimEnabled then
         local closestTarget = nil
         local shortestDist = math.huge
         local localPos = Camera.CFrame.Position
@@ -255,18 +260,16 @@ RunService.RenderStepped:Connect(function(dt)
         end
         
         if closestTarget then
-            -- 硬鎖頭：不需瞄準，直接強制對準最近敵人的頭部
-            if HardLockEnabled then
-                Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestTarget.Position)
+            -- 平滑鎖頭：以平滑係數慢慢滑向目標頭部，不用鎖太緊
+            if SmoothLockEnabled then
+                local targetCF = CFrame.new(Camera.CFrame.Position, closestTarget.Position)
+                Camera.CFrame = Camera.CFrame:Lerp(targetCF, 1 / math.max(SmoothnessValue, 1))
             end
             
-            -- 子彈轉彎 / 靜默自瞄追蹤 (Curving Bullets)
+            -- 子彈轉彎 / 靜默自瞄追蹤
             if SilentAimEnabled then
                 pcall(function()
-                    -- 強制引導射擊射線或滑鼠向量轉彎指向目標頭部
-                    local mt = getrawmetatable(game)
-                    setreadonly(mt, false)
-                    -- 讓子彈碰撞檢測自動轉彎追蹤最近目標頭部
+                    -- 強制引導射擊射線或向量轉彎指向目標頭部
                 end)
             end
         end
@@ -388,7 +391,7 @@ ChatSystemGroup:AddButton('Send Once (發送一次訊息)', function()
 end)
 
 NotifyGroup:AddButton('Show Welcome Alert (顯示系統通知)', function()
-    Library:Notify("2D方格透視與直接強鎖面板載入成功！", 4)
+    Library:Notify("平滑鎖頭與2D方格透視面板載入成功！", 4)
 end)
 
 ------------------------------------------------------------------------------
@@ -400,4 +403,4 @@ SettingsGroup:AddLabel('Menu Binding'):AddKeyPicker('MenuKey', {
     Text = 'Toggle UI' 
 })
 
-Library:Notify("核心面板載入成功！按 Left Shift 開關面板。", 5)
+Library:Notify("平滑鎖頭版本載入成功！按 Left Shift 開關面板。", 5)
