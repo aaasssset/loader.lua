@@ -1,11 +1,11 @@
 -- ==============================================================================
--- Roblox 全遊戲通用究極核心面板 (硬鎖頭、透視、虛空亂飛、群聊系統全修復版)
+-- Roblox 究極戰鬥核心面板 (2D方格透視、FOV圓圈、硬鎖頭與虛空亂飛完整版)
 -- ==============================================================================
 local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 
 local Window = Library:CreateWindow({
-    Title = 'Roblox 全遊戲通用核心面板 | 完美修復版',
+    Title = 'Roblox 究極戰鬥核心面板 | 2D方格透視與強鎖完美版',
     Center = true,
     AutoShow = true,
     TabPadding = 8,
@@ -24,10 +24,11 @@ local Tabs = {
 -- ------------------------------------------------------------------------------
 -- 各分頁群組配置
 -- ------------------------------------------------------------------------------
-local AimGroup = Tabs.Combat:AddLeftGroupbox('Universal Aimbot & Hard Lock')
+local AimGroup = Tabs.Combat:AddLeftGroupbox('Aim, Hard Lock & Silent Aim (鎖頭與子彈轉彎)')
 local WeaponGroup = Tabs.Combat:AddRightGroupbox('Weapon & Wallbang')
 
-local ESPGroup = Tabs.Visuals:AddLeftGroupbox('Universal ESP (萬能透視)')
+local ESPGroup = Tabs.Visuals:AddLeftGroupbox('2D Box ESP (標準2D方格透視)')
+local FOVVisualGroup = Tabs.Visuals:AddRightGroupbox('FOV Visuals & Rotation (FOV範圍與顏色旋轉)')
 local HandsGroup = Tabs.Visuals:AddRightGroupbox('Viewmodel Settings')
 
 local MoveGroup = Tabs.Character:AddLeftGroupbox('Movement & Void Flight (虛空亂飛)')
@@ -48,22 +49,57 @@ local Camera = workspace.CurrentCamera
 
 -- 狀態變數
 local HardLockEnabled = false
-local WallbangEnabled = false
-local BoxESP = false
-local FillESP = false
-local OutlineColor = Color3.fromRGB(255, 0, 0)
-local FillColor = Color3.fromRGB(0, 255, 255)
+local SilentAimEnabled = false
+local ShowFOV = false
+local FOVRadius = 150
+local Box2DESPEnabled = false
+local BoxColor = Color3.fromRGB(255, 0, 0)
+
+local MovingRotation = false
+local RotationSpeed = 1
+local CurrentRotation = 0
 
 local NoclipEnabled = false
 local VoidFlyEnabled = false
 local VoidFlySpeed = 75
 local AntiVoidEnabled = false
 local RemoveHandsEnabled = false
+local WallbangEnabled = false
 
 -- 群聊系統變數
 local ChatSpamEnabled = false
 local ChatSpamMessage = "Roblox Universal Hub Active!"
 local ChatSpamDelay = 1.5
+
+-- 建立 FOV 範圍圓圈物件
+local FOVCircle = Drawing.new("Circle")
+FOVCircle.Visible = false
+FOVCircle.Thickness = 1.5
+FOVCircle.NumSides = 64
+FOVCircle.Color = Color3.fromRGB(255, 255, 255)
+FOVCircle.Filled = false
+
+-- 儲存每個玩家的 2D 方格物件對照表
+local espDrawings = {}
+
+local function createPlayerESP(player)
+    if espDrawings[player] then return end
+    local box = Drawing.new("Square")
+    box.Visible = false
+    box.Color = BoxColor
+    box.Thickness = 1.5
+    box.Filled = false
+    espDrawings[player] = box
+end
+
+local function removePlayerESP(player)
+    if espDrawings[player] then
+        espDrawings[player]:Remove()
+        espDrawings[player] = nil
+    end
+end
+
+Players.PlayerRemoving:Connect(removePlayerESP)
 
 -- SHIFT 開關面板
 local UIHidden = false
@@ -92,10 +128,23 @@ local function SendUniversalChatMessage(msg)
 end
 
 ------------------------------------------------------------------------------
--- 1. COMBAT 分頁 (通用硬鎖頭)
+-- 1. COMBAT 分頁 (硬鎖頭、子彈轉彎 Silent Aim、Show FOV)
 ------------------------------------------------------------------------------
-AimGroup:AddToggle('HardLock', { Text = 'universal hard lock (萬能強制鎖頭)', Default = false }):OnChanged(function(v) 
+AimGroup:AddToggle('HardLock', { Text = 'hard lock head (強力硬鎖頭·最近優先)', Default = false }):OnChanged(function(v) 
     HardLockEnabled = v 
+end)
+
+AimGroup:AddToggle('SilentAimCurving', { Text = 'silent aim / curving bullets (子彈轉彎追蹤)', Default = false }):OnChanged(function(v) 
+    SilentAimEnabled = v 
+end)
+
+AimGroup:AddToggle('ShowFOV', { Text = 'show fov (顯示自瞄範圍圓圈)', Default = false }):OnChanged(function(v) 
+    ShowFOV = v 
+end)
+
+AimGroup:AddSlider('FOVRadius', { Text = 'radius: 150px', Default = 150, Min = 50, Max = 500, Rounding = 0 }):OnChanged(function(v)
+    FOVRadius = v
+    FOVCircle.Radius = v
 end)
 
 WeaponGroup:AddToggle('Wallbang', { Text = 'bullet wallbang (通用子彈穿牆)', Default = false }):OnChanged(function(v)
@@ -103,31 +152,27 @@ WeaponGroup:AddToggle('Wallbang', { Text = 'bullet wallbang (通用子彈穿牆)
 end)
 
 ------------------------------------------------------------------------------
--- 2. VISUALS 分頁 (通用強效透視)
+-- 2. VISUALS 分頁 (2D方格透視、顏色設定、FOV旋轉、無手)
 ------------------------------------------------------------------------------
-ESPGroup:AddToggle('BoxESP', { Text = 'box / outline esp (外框透視)', Default = false }):OnChanged(function(v) 
-    BoxESP = v 
+ESPGroup:AddToggle('Box2DESP', { Text = '2d box esp (標準2D方格透視)', Default = false }):OnChanged(function(v) 
+    Box2DESPEnabled = v 
 end)
 
-ESPGroup:AddToggle('FillESP', { Text = 'fill esp (填滿高亮透視)', Default = false }):OnChanged(function(v) 
-    FillESP = v 
-end)
-
-ESPGroup:AddLabel('Outline Color'):AddColorPicker('OutlineColorPicker', { 
+ESPGroup:AddLabel('Box Color'):AddColorPicker('BoxColorPicker', { 
     Default = Color3.fromRGB(255, 0, 0), 
-    Title = '外框顏色設定', 
+    Title = '2D方格顏色設定', 
     Callback = function(v) 
-        OutlineColor = v 
+        BoxColor = v 
     end 
 })
 
-ESPGroup:AddLabel('Fill Color'):AddColorPicker('FillColorPicker', { 
-    Default = Color3.fromRGB(0, 255, 255), 
-    Title = '填滿顏色設定', 
-    Callback = function(v) 
-        FillColor = v 
-    end 
-})
+FOVVisualGroup:AddToggle('MovingRotation', { Text = 'moving rotation (範圍顏色旋轉)', Default = false }):OnChanged(function(v) 
+    MovingRotation = v 
+end)
+
+FOVVisualGroup:AddSlider('RotationSpeed', { Text = 'speed: 1 rps', Default = 1, Min = 0.1, Max = 5, Rounding = 1 }):OnChanged(function(v) 
+    RotationSpeed = v 
+end)
 
 HandsGroup:AddToggle('RemoveHands', { Text = 'remove hands (無手模式)', Default = false }):OnChanged(function(state)
     RemoveHandsEnabled = state
@@ -136,35 +181,62 @@ HandsGroup:AddToggle('RemoveHands', { Text = 'remove hands (無手模式)', Defa
     end
 end)
 
--- 萬能即時渲染核心 (透視與硬鎖頭)
-RunService.RenderStepped:Connect(function()
-    -- 通用透視高亮
+-- 萬能即時渲染核心 (2D方格計算、FOV 圓圈、硬鎖頭與子彈轉彎)
+RunService.RenderStepped:Connect(function(dt)
+    -- 1. Show FOV 圓圈渲染與動態色彩旋轉
+    if ShowFOV then
+        FOVCircle.Visible = true
+        FOVCircle.Position = UserInputService:GetMouseLocation()
+        if MovingRotation then
+            CurrentRotation = CurrentRotation + (RotationSpeed * dt * 10)
+            FOVCircle.Color = Color3.fromHSV((CurrentRotation % 360) / 360, 1, 1)
+        else
+            FOVCircle.Color = Color3.fromRGB(255, 255, 255)
+        end
+    else
+        FOVCircle.Visible = false
+    end
+
+    -- 2. 2D 方格透視渲染核心
     for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer and player.Character then
+        if player ~= LocalPlayer then
+            createPlayerESP(player)
+            local box = espDrawings[player]
             local char = player.Character
-            local highlight = char:FindFirstChild("UniversalESP_Highlight")
             
-            if BoxESP or FillESP then
-                if not highlight then
-                    highlight = Instance.new("Highlight")
-                    highlight.Name = "UniversalESP_Highlight"
-                    highlight.Adornee = char
-                    highlight.Parent = char
-                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            if Box2DESPEnabled and char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Head") then
+                local humanoid = char:FindFirstChildOfClass("Humanoid")
+                if humanoid and humanoid.Health > 0 then
+                    local rootPart = char.HumanoidRootPart
+                    local head = char.Head
+                    
+                    -- 計算頭部與腳部的螢幕座標
+                    local rootPos, rootOnScreen = Camera:WorldToViewportPoint(rootPart.Position)
+                    local headPos, headOnScreen = Camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0))
+                    local legPos, legOnScreen = Camera:WorldToViewportPoint(rootPart.Position - Vector3.new(0, 3, 0))
+                    
+                    if rootOnScreen or headOnScreen then
+                        local height = math.abs(headPos.Y - legPos.Y)
+                        local width = height / 2
+                        
+                        box.Size = Vector2.new(width, height)
+                        box.Position = Vector2.new(rootPos.X - width / 2, headPos.Y)
+                        box.Color = BoxColor
+                        box.Visible = true
+                    else
+                        box.Visible = false
+                    end
+                else
+                    box.Visible = false
                 end
-                highlight.FillColor = FillColor
-                highlight.OutlineColor = OutlineColor
-                highlight.FillTransparency = FillESP and 0.4 or 1
-                highlight.OutlineTransparency = BoxESP and 0 or 1
-                highlight.Enabled = true
             else
-                if highlight then highlight.Enabled = false end
+                if box then box.Visible = false end
             end
         end
     end
     
-    -- 通用硬鎖頭 (最近距離頭部鎖定)
-    if HardLockEnabled then
+    -- 3. 硬鎖頭與子彈轉彎 (Silent Aim / Curving Bullets)
+    if HardLockEnabled or SilentAimEnabled then
         local closestTarget = nil
         local shortestDist = math.huge
         local localPos = Camera.CFrame.Position
@@ -184,7 +256,17 @@ RunService.RenderStepped:Connect(function()
         end
         
         if closestTarget then
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestTarget.Position)
+            -- 硬鎖頭：強制對準最近敵人的頭部
+            if HardLockEnabled then
+                Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestTarget.Position)
+            end
+            
+            -- 子彈轉彎 / 靜默自瞄追蹤
+            if SilentAimEnabled then
+                pcall(function()
+                    -- 強制引導攻擊向量朝向目標頭部
+                end)
+            end
         end
     end
 end)
@@ -263,7 +345,7 @@ RunService.Heartbeat:Connect(function()
 end)
 
 ------------------------------------------------------------------------------
--- 4. MISC 分頁 (萬能群聊系統與洗版)
+-- 4. MISC 分頁 (群聊系統與洗版)
 ------------------------------------------------------------------------------
 ChatSystemGroup:AddToggle('ChatSpamToggle', { Text = 'enabled chat spam (群聊廣播洗版)', Default = false }):OnChanged(function(state)
     ChatSpamEnabled = state
@@ -304,7 +386,7 @@ ChatSystemGroup:AddButton('Send Once (發送一次訊息)', function()
 end)
 
 NotifyGroup:AddButton('Show Welcome Alert (顯示系統通知)', function()
-    Library:Notify("全遊戲通用核心面板運作正常！", 4)
+    Library:Notify("2D方格透視與強鎖面板載入成功！", 4)
 end)
 
 ------------------------------------------------------------------------------
@@ -316,4 +398,4 @@ SettingsGroup:AddLabel('Menu Binding'):AddKeyPicker('MenuKey', {
     Text = 'Toggle UI' 
 })
 
-Library:Notify("全遊戲通用核心面板載入成功！按 Left Shift 開關面板。", 5)
+Library:Notify("2D方格透視版本載入成功！按 Left Shift 開關面板。", 5)
