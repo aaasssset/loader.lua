@@ -993,7 +993,7 @@ local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 
 local CombatWindow = Library:CreateWindow({
-    Title = 'WETQA面板 | discord.gg/GbrS6eTsfq',
+    Title = 'Roblox 究極戰鬥核心面板 | 平滑鎖頭與2D透視版',
     Center = true,
     AutoShow = true,
     TabPadding = 8,
