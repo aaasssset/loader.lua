@@ -1,16 +1,18 @@
-
+-- ==============================================================================
+-- Roblox 究極戰鬥核心面板 (硬鎖頭、最近優先、強制透視、虛空亂飛修復版)
+-- ==============================================================================
 local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 
 local Window = Library:CreateWindow({
-    Title = 'WETQA面板 | discord.gg/GbrS6eTsfq',
+    Title = 'Roblox 究極戰鬥核心面板 | 強鎖與透視修復版',
     Center = true,
     AutoShow = true,
     TabPadding = 8,
     MenuFadeTime = 0.2
 })
 
--- 建立 4 大核心精簡分頁
+-- 建立 4 大核心分頁
 local Tabs = {
     Combat = Window:AddTab('combat'),
     Visuals = Window:AddTab('visuals'),
@@ -18,31 +20,29 @@ local Tabs = {
     Settings = Window:AddTab('settings')
 }
 
--- ------------------------------------------------------------------------------
--- 各分頁群組配置
--- ------------------------------------------------------------------------------
-local AimGroup = Tabs.Combat:AddLeftGroupbox('Aim & Silent Aim (自瞄與鎖頭)')
+-- 群組配置
+local AimGroup = Tabs.Combat:AddLeftGroupbox('Aim & Hard Lock (硬鎖頭與自瞄)')
 local WeaponGroup = Tabs.Combat:AddRightGroupbox('Weapon & Firerate (射速與穿牆)')
 
-local ESPGroup = Tabs.Visuals:AddLeftGroupbox('ESP Options (方框與高亮透視)')
+local ESPGroup = Tabs.Visuals:AddLeftGroupbox('ESP Options (強效透視)')
 local FOVVisualGroup = Tabs.Visuals:AddRightGroupbox('FOV Visuals & Rotation (範圍與顏色旋轉)')
 local HandsGroup = Tabs.Visuals:AddRightGroupbox('Viewmodel (無手模式設定)')
 
 local MoveGroup = Tabs.Character:AddLeftGroupbox('Movement & Void Flight (虛空亂飛與穿牆)')
 local SettingsGroup = Tabs.Settings:AddLeftGroupbox('UI Settings & Keybinds')
 
--- 核心系統服務與全域變數宣告
+-- 核心系統服務
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
--- 功能狀態變數宣告
+-- 狀態變數
 local SilentAimEnabled = false
-local AimbotEnabled = false
+local HardLockEnabled = false
 local ShowFOV = false
-local FOVRadius = 150
+local FOVRadius = 200
 local BoxESP = false
 local FillESP = false
 local OutlineColor = Color3.fromRGB(255, 0, 0)
@@ -60,7 +60,7 @@ local RemoveHandsEnabled = false
 local WallbangEnabled = false
 local FirerateMultiplier = 1.0
 
--- 建立 FOV 圓圈物件 (Drawing API)
+-- 建立 FOV 範圍圓圈
 local FOVCircle = Drawing.new("Circle")
 FOVCircle.Visible = false
 FOVCircle.Thickness = 1.5
@@ -68,7 +68,7 @@ FOVCircle.NumSides = 64
 FOVCircle.Color = Color3.fromRGB(255, 255, 255)
 FOVCircle.Filled = false
 
--- SHIFT 快捷鍵開關面板監聽
+-- SHIFT 開關面板
 local UIHidden = false
 UserInputService.InputBegan:Connect(function(input)
     if input.KeyCode == Enum.KeyCode.LeftShift then
@@ -78,21 +78,21 @@ UserInputService.InputBegan:Connect(function(input)
 end)
 
 ------------------------------------------------------------------------------
--- 1. COMBAT 分頁邏輯 (靜默自瞄、鎖頭、Show FOV、子彈穿牆、射速)
+-- 1. COMBAT 分頁 (硬鎖頭：最近距離優先、強制釘在頭部)
 ------------------------------------------------------------------------------
 AimGroup:AddToggle('SilentAim', { Text = 'silent aim (靜默自瞄)', Default = false }):OnChanged(function(v) 
     SilentAimEnabled = v 
 end)
 
-AimGroup:AddToggle('Aimbot', { Text = 'aimbot / lock head (強力鎖頭)', Default = false }):OnChanged(function(v) 
-    AimbotEnabled = v 
+AimGroup:AddToggle('HardLock', { Text = 'hard lock head (強力硬鎖頭·最近優先)', Default = false }):OnChanged(function(v) 
+    HardLockEnabled = v 
 end)
 
 AimGroup:AddToggle('ShowFOV', { Text = 'show fov (顯示自瞄範圍)', Default = false }):OnChanged(function(v) 
     ShowFOV = v 
 end)
 
-AimGroup:AddSlider('FOVRadius', { Text = 'radius: 150px', Default = 150, Min = 10, Max = 600, Rounding = 0 }):OnChanged(function(v)
+AimGroup:AddSlider('FOVRadius', { Text = 'radius: 200px', Default = 200, Min = 50, Max = 800, Rounding = 0 }):OnChanged(function(v)
     FOVRadius = v
     FOVCircle.Radius = v
 end)
@@ -106,7 +106,7 @@ WeaponGroup:AddSlider('Firerate', { Text = 'firerate multiplier: 1x', Default = 
 end)
 
 ------------------------------------------------------------------------------
--- 2. VISUALS 分頁邏輯 (強力修復透視高亮、自訂顏色、動態旋轉、無手)
+-- 2. VISUALS 分頁 (透視強制修復、高亮色彩)
 ------------------------------------------------------------------------------
 ESPGroup:AddToggle('BoxESP', { Text = 'box / outline (外框透視)', Default = false }):OnChanged(function(v) 
     BoxESP = v 
@@ -147,9 +147,9 @@ HandsGroup:AddToggle('RemoveHands', { Text = 'remove hands (無手模式)', Defa
     end
 end)
 
--- 即時渲染迴圈：完美修復鎖頭與透視的高效能核心
+-- 即時渲染核心：強制最近距離頭部硬鎖 + 透視高亮
 RunService.RenderStepped:Connect(function(dt)
-    -- Show FOV 渲染與旋轉動畫計算
+    -- Show FOV 顯示
     if ShowFOV then
         FOVCircle.Visible = true
         FOVCircle.Position = UserInputService:GetMouseLocation()
@@ -163,18 +163,19 @@ RunService.RenderStepped:Connect(function(dt)
         FOVCircle.Visible = false
     end
 
-    -- ★ 透視修復強化：強制為所有玩家建立與更新 Highlight
+    -- ★ 透視修復：強效生成高亮物件，確保能看穿牆壁與障礙物
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character then
             local char = player.Character
-            local highlight = char:FindFirstChild("EnhancedESP_Highlight")
+            local highlight = char:FindFirstChild("AbsoluteESP_Highlight")
             
             if BoxESP or FillESP then
                 if not highlight then
                     highlight = Instance.new("Highlight")
-                    highlight.Name = "EnhancedESP_Highlight"
+                    highlight.Name = "AbsoluteESP_Highlight"
                     highlight.Adornee = char
                     highlight.Parent = char
+                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- 關鍵：強制顯示在最上層（穿牆可見）
                 end
                 highlight.FillColor = FillColor
                 highlight.OutlineColor = OutlineColor
@@ -189,23 +190,23 @@ RunService.RenderStepped:Connect(function(dt)
         end
     end
     
-    -- ★ 鎖頭修復強化：完美捕捉畫面內的敵人頭部並平滑/直接鎖定
-    if AimbotEnabled then
+    -- ★ 硬鎖頭修復：不需右鍵，自動抓取畫面中「距離自己最近」的敵方頭部直接鎖死
+    if HardLockEnabled then
         local closestTarget = nil
-        local shortestDist = FOVRadius
-        local mousePos = UserInputService:GetMouseLocation()
+        local shortestDist = math.huge -- 不受 FOV 限制或以最近距離優先
+        local localPos = Camera.CFrame.Position
         
         for _, v in pairs(Players:GetPlayers()) do
             if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
                 local humanoid = v.Character:FindFirstChildOfClass("Humanoid")
                 if humanoid and humanoid.Health > 0 then
-                    local headPos, onScreen = Camera:WorldToScreenPoint(v.Character.Head.Position)
-                    if onScreen then
-                        local dist = (mousePos - Vector2.new(headPos.X, headPos.Y)).Magnitude
-                        if dist < shortestDist then
-                            shortestDist = dist
-                            closestTarget = v.Character.Head
-                        end
+                    local headPart = v.Character.Head
+                    local dist = (localPos - headPart.Position).Magnitude
+                    
+                    -- 尋找距離最近的活著目標
+                    if dist < shortestDist then
+                        shortestDist = dist
+                        closestTarget = headPart
                     end
                 end
             end
@@ -218,13 +219,12 @@ RunService.RenderStepped:Connect(function(dt)
 end)
 
 ------------------------------------------------------------------------------
--- 3. CHARACTER 分頁邏輯 (虛空亂飛、穿牆、防虛空保護)
+-- 3. CHARACTER 分頁邏輯 (虛空亂飛、穿牆、防虛空)
 ------------------------------------------------------------------------------
 MoveGroup:AddToggle('Noclip', { Text = 'noclip (全身穿牆)', Default = false }):OnChanged(function(state) 
     NoclipEnabled = state 
 end)
 
--- 虛空亂飛模式 (Void Flight)
 MoveGroup:AddToggle('VoidFly', { Text = 'void fly (虛空亂飛模式)', Default = false }):OnChanged(function(state)
     VoidFlyEnabled = state
     local char = LocalPlayer.Character
@@ -249,24 +249,12 @@ MoveGroup:AddToggle('VoidFly', { Text = 'void fly (虛空亂飛模式)', Default
                 local camCFrame = Camera.CFrame
                 local moveDir = Vector3.new(0, 0, 0)
                 
-                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
-                    moveDir = moveDir + camCFrame.LookVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
-                    moveDir = moveDir - camCFrame.LookVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
-                    moveDir = moveDir - camCFrame.RightVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
-                    moveDir = moveDir + camCFrame.RightVector
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then
-                    moveDir = moveDir + Vector3.new(0, 1, 0)
-                end
-                if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then
-                    moveDir = moveDir - Vector3.new(0, 1, 0)
-                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + camCFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - camCFrame.LookVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - camCFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + camCFrame.RightVector end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDir = moveDir + Vector3.new(0, 1, 0) end
+                if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDir = moveDir - Vector3.new(0, 1, 0) end
                 
                 BV.Velocity = moveDir * VoidFlySpeed
                 BG.CFrame = camCFrame
@@ -318,4 +306,4 @@ SettingsGroup:AddLabel('Menu Binding'):AddKeyPicker('MenuKey', {
     Text = 'Toggle UI' 
 })
 
-Library:Notify("鎖頭與透視強化修復版載入成功！按 Left Shift 開關面板。", 5)
+Library:Notify("硬鎖頭與強制透視修復版載入成功！按 Left Shift 開關面板。", 5)
