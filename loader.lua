@@ -1,5 +1,5 @@
 -- ==============================================================================
--- Roblox 究極戰鬥核心面板 + 完整改皮解鎖系統 (全功能完美整合版)
+-- Roblox 究極戰鬥核心面板 + 內嵌分頁與「開啟改皮面板按鈕」完整版
 -- ==============================================================================
 
 -- ==============================================================================
@@ -56,6 +56,7 @@ local originalCreateViewModel
 local ClientViewModelRef, originalGetWrap, originalNew
 local originalReplicateFromServer
 local ViewProfileRef, originalFetch
+local _cosmeticGui
 
 local function cloneCosmetic(name, cosmeticType, options)
     local base = CosmeticLibrary.Cosmetics[name]
@@ -399,13 +400,415 @@ _G.RivalsReset = resetCharacter
 
 
 -- ==============================================================================
--- PART 2: 戰鬥核心面板 + 內嵌改皮分頁 (LinoriaLib 完整大合集)
+-- 獨立圖像式改皮面板生成邏輯（透過按鈕觸發）
+-- ==============================================================================
+local function openCosmeticChangerGUI()
+    if _cosmeticGui then
+        _cosmeticGui.Enabled = not _cosmeticGui.Enabled
+        return
+    end
+
+    local COSMETIC_TYPES = {"Skin", "Wrap", "Charm", "Finisher"}
+    local function buildWeaponList()
+        local items = ItemLibrary.Items or ItemLibrary
+        local seen, list = {}, {}
+        for _, data in pairs(CosmeticLibrary.Cosmetics) do
+            if type(data) == "table" and data.ItemName and not seen[data.ItemName] and not tostring(data.ItemName):find("MISSING") then
+                seen[data.ItemName] = true
+                local img = "rbxassetid://0"
+                local it = items[data.ItemName]
+                if it and it.Image then img = it.Image end
+                table.insert(list, {Name = data.ItemName, Image = img})
+            end
+        end
+        table.sort(list, function(a, b) return a.Name < b.Name end)
+        return list
+    end
+
+    local function getCosmetics(weaponName, cosmeticType)
+        local res = {}
+        for name, data in pairs(CosmeticLibrary.Cosmetics) do
+            if type(data) == "table" and data.Type == cosmeticType then
+                if data.ItemName == weaponName or data.ItemName == nil then
+                    local n = tostring(name)
+                    if not n:find("MISSING") then
+                        table.insert(res, {Name = n, Image = data.Image or "rbxassetid://0"})
+                    end
+                end
+            end
+        end
+        table.sort(res, function(a, b) return a.Name < b.Name end)
+        return res
+    end
+
+    local LibraryUEL
+    pcall(function()
+        LibraryUEL = loadstring(game:HttpGet("https://raw.githubusercontent.com/engnyg/UELinoriaLib/main/Library.lua"))()
+    end)
+    LibraryUEL = LibraryUEL or {}
+
+    local function themeColor(key, fallback)
+        local v = LibraryUEL[key]
+        if typeof(v) == "Color3" then return v end
+        return fallback
+    end
+    local BG = themeColor("BackgroundColor", Color3.fromRGB(14, 13, 21))
+    local PANEL = themeColor("MainColor", Color3.fromRGB(22, 20, 34))
+    local OUTLINE = themeColor("OutlineColor", Color3.fromRGB(38, 35, 54))
+    local ACCENT = themeColor("AccentColor", Color3.fromRGB(100, 65, 165))
+    local TEXT = themeColor("FontColor", Color3.fromRGB(255, 255, 255))
+    local CELL = OUTLINE
+    local SELBG = Color3.fromRGB(38, 78, 44)
+    local SELLINE = Color3.fromRGB(95, 200, 110)
+    local UIFONT = (typeof(LibraryUEL.Font) == "EnumItem") and LibraryUEL.Font or Enum.Font.Code
+
+    local function heldWeaponName()
+        local name
+        pcall(function()
+            if not FighterController then return end
+            local fighter = FighterController:GetFighter(player)
+            if not fighter or not fighter.Items then return end
+            for _, item in pairs(fighter.Items) do
+                local ok, a = pcall(function() return item:IsActive() end)
+                if ok and a then name = tostring(item.Name) break end
+            end
+        end)
+        return name
+    end
+
+    local weaponList = buildWeaponList()
+    local weaponNames = {}
+    for _, w in ipairs(weaponList) do table.insert(weaponNames, w.Name) end
+
+    local selectedWeapon = heldWeaponName() or weaponNames[1]
+    local selectedType = "Skin"
+    local lastCosmeticName = nil
+    local renderCosmetics
+
+    local panel = Instance.new("ScreenGui")
+    panel.Name = "CosmeticChangerPanel"
+    panel.ResetOnSpawn = false
+    panel.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    panel.IgnoreGuiInset = true
+    panel.Enabled = true
+    pcall(function() panel.Parent = (gethui and gethui()) or game:GetService("CoreGui") end)
+    if not panel.Parent then panel.Parent = player:WaitForChild("PlayerGui") end
+    _cosmeticGui = panel
+
+    local function strokeOf(inst, color, thickness)
+        local s = Instance.new("UIStroke", inst)
+        s.Color = color or OUTLINE
+        s.Thickness = thickness or 1
+        s.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        return s
+    end
+
+    local main = Instance.new("Frame")
+    main.Size = UDim2.new(0, 540, 0, 744)
+    main.Position = UDim2.new(0.5, -270, 0.5, -372)
+    main.BackgroundColor3 = BG
+    main.BorderSizePixel = 0
+    main.Active = true
+    main.Draggable = true
+    main.Parent = panel
+    strokeOf(main, ACCENT, 1)
+
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0, 28)
+    title.BackgroundColor3 = PANEL
+    title.BorderSizePixel = 0
+    title.Text = "專業武器改皮面板 (點擊圖示套用外觀)"
+    title.TextColor3 = TEXT
+    title.Font = UIFONT
+    title.TextSize = 13
+    title.Parent = main
+    strokeOf(title, OUTLINE, 1)
+
+    local function makeLabel(text, y)
+        local l = Instance.new("TextLabel")
+        l.Size = UDim2.new(1, -20, 0, 16)
+        l.Position = UDim2.new(0, 10, 0, y)
+        l.BackgroundTransparency = 1
+        l.Text = text
+        l.TextColor3 = TEXT
+        l.TextTransparency = 0.35
+        l.TextXAlignment = Enum.TextXAlignment.Left
+        l.Font = UIFONT
+        l.TextSize = 12
+        l.Parent = main
+        return l
+    end
+
+    local function makeSearch(y)
+        local box = Instance.new("TextBox")
+        box.Size = UDim2.new(1, -20, 0, 24)
+        box.Position = UDim2.new(0, 10, 0, y)
+        box.BackgroundColor3 = PANEL
+        box.BorderSizePixel = 0
+        box.PlaceholderText = "search..."
+        box.Text = ""
+        box.TextColor3 = TEXT
+        box.PlaceholderColor3 = Color3.fromRGB(120, 115, 140)
+        box.Font = UIFONT
+        box.TextSize = 13
+        box.TextXAlignment = Enum.TextXAlignment.Left
+        box.ClearTextOnFocus = false
+        box.Parent = main
+        strokeOf(box, OUTLINE, 1)
+        local pad = Instance.new("UIPadding", box)
+        pad.PaddingLeft = UDim.new(0, 8)
+        return box
+    end
+
+    local function makeScroll(y, h, cell)
+        cell = cell or 76
+        local sf = Instance.new("ScrollingFrame")
+        sf.Size = UDim2.new(1, -20, 0, h)
+        sf.Position = UDim2.new(0, 10, 0, y)
+        sf.BackgroundColor3 = PANEL
+        sf.BorderSizePixel = 0
+        sf.ScrollBarThickness = 4
+        sf.ScrollBarImageColor3 = ACCENT
+        sf.CanvasSize = UDim2.new(0, 0, 0, 0)
+        sf.AutomaticCanvasSize = Enum.AutomaticSize.Y
+        sf.Parent = main
+        strokeOf(sf, OUTLINE, 1)
+        local grid = Instance.new("UIGridLayout", sf)
+        grid.CellSize = UDim2.new(0, cell, 0, cell)
+        grid.CellPadding = UDim2.new(0, 8, 0, 8)
+        grid.SortOrder = Enum.SortOrder.LayoutOrder
+        local pad = Instance.new("UIPadding", sf)
+        pad.PaddingTop = UDim.new(0, 8)
+        pad.PaddingLeft = UDim.new(0, 8)
+        return sf
+    end
+
+    local function makeCell(parent, name, image, onClick)
+        local cell = Instance.new("TextButton")
+        cell.Size = UDim2.new(0, 76, 0, 76)
+        cell.BackgroundColor3 = CELL
+        cell.BorderSizePixel = 0
+        cell.Text = ""
+        cell.AutoButtonColor = true
+        cell.Parent = parent
+        local st = strokeOf(cell, OUTLINE, 1)
+
+        local img = Instance.new("ImageLabel")
+        img.Size = UDim2.new(1, -4, 1, -16)
+        img.Position = UDim2.new(0, 2, 0, 0)
+        img.BackgroundTransparency = 1
+        img.Image = image or ""
+        img.ScaleType = Enum.ScaleType.Fit
+        img.Parent = cell
+
+        local nm = Instance.new("TextLabel")
+        nm.Size = UDim2.new(1, -4, 0, 16)
+        nm.Position = UDim2.new(0, 2, 1, -17)
+        nm.BackgroundTransparency = 1
+        nm.Text = name
+        nm.TextColor3 = TEXT
+        nm.Font = UIFONT
+        nm.TextSize = 11
+        nm.TextWrapped = true
+        nm.TextTruncate = Enum.TextTruncate.AtEnd
+        nm.Parent = cell
+        cell.MouseButton1Click:Connect(onClick)
+        return cell, st
+    end
+
+    makeLabel("weapon filter", 34)
+    local weaponSearch = makeSearch(52)
+    local weaponScroll = makeScroll(82, 180)
+
+    makeLabel("cosmetic filter", 270)
+    local cosmeticSearch = makeSearch(288)
+    local cosmeticScroll = makeScroll(318, 180)
+
+    local typeBtn = Instance.new("TextButton")
+    typeBtn.Size = UDim2.new(1, -20, 0, 26)
+    typeBtn.Position = UDim2.new(0, 10, 0, 506)
+    typeBtn.BackgroundColor3 = PANEL
+    typeBtn.BorderSizePixel = 0
+    typeBtn.Text = "  " .. selectedType
+    typeBtn.TextXAlignment = Enum.TextXAlignment.Left
+    typeBtn.TextColor3 = TEXT
+    typeBtn.Font = UIFONT
+    typeBtn.TextSize = 13
+    typeBtn.Parent = main
+    strokeOf(typeBtn, ACCENT, 1)
+
+    local typeList = Instance.new("Frame")
+    typeList.Size = UDim2.new(1, -20, 0, #COSMETIC_TYPES * 24)
+    typeList.Position = UDim2.new(0, 10, 0, 532)
+    typeList.BackgroundColor3 = PANEL
+    typeList.BorderSizePixel = 0
+    typeList.Visible = false
+    typeList.ZIndex = 50
+    typeList.Parent = main
+    strokeOf(typeList, ACCENT, 1).ZIndex = 50
+    local typeLayout = Instance.new("UIListLayout", typeList)
+
+    for _, t in ipairs(COSMETIC_TYPES) do
+        local opt = Instance.new("TextButton")
+        opt.Size = UDim2.new(1, 0, 0, 24)
+        opt.BackgroundColor3 = PANEL
+        opt.BorderSizePixel = 0
+        opt.Text = t
+        opt.TextColor3 = TEXT
+        opt.Font = UIFONT
+        opt.TextSize = 13
+        opt.ZIndex = 51
+        opt.Parent = typeList
+        opt.MouseButton1Click:Connect(function()
+            selectedType = t
+            typeBtn.Text = "  " .. t
+            typeList.Visible = false
+            renderCosmetics(cosmeticSearch.Text)
+        end)
+    end
+
+    typeBtn.MouseButton1Click:Connect(function()
+        typeList.Visible = not typeList.Visible
+    end)
+
+    local function styledBtn(text, xs, xo, ws, wo, y)
+        local b = Instance.new("TextButton")
+        b.Size = UDim2.new(ws, wo, 0, 26)
+        b.Position = UDim2.new(xs, xo, 0, y)
+        b.BackgroundColor3 = PANEL
+        b.BorderSizePixel = 0
+        b.Text = text
+        b.TextColor3 = TEXT
+        b.Font = UIFONT
+        b.TextSize = 13
+        b.Parent = main
+        strokeOf(b, OUTLINE, 1)
+        return b
+    end
+
+    local applyAllBtn = styledBtn("apply selected to all", 0, 10, 1, -20, 596)
+    local applyNowBtn = styledBtn("APPLY NOW (reset character)", 0, 10, 1, -20, 628)
+    applyNowBtn.TextColor3 = ACCENT
+
+    local resetBtn = styledBtn("reset to defaults", 0, 10, 0.5, -14, 676)
+    local closeBtn = styledBtn("close", 0.5, 4, 0.5, -14, 676)
+
+    local weaponStrokes = {}
+    local function applyWeaponHighlight(name)
+        for n, s in pairs(weaponStrokes) do
+            local c = s.Parent
+            local on = (n == name)
+            s.Color = on and SELLINE or OUTLINE
+            s.Thickness = on and 2 or 1
+            if c then c.BackgroundColor3 = on and SELBG or CELL end
+        end
+    end
+
+    local function renderWeapons(filter)
+        for _, c in ipairs(weaponScroll:GetChildren()) do
+            if c:IsA("TextButton") then c:Destroy() end
+        end
+        weaponStrokes = {}
+        filter = (filter or ""):lower()
+        for _, w in ipairs(weaponList) do
+            if filter == "" or w.Name:lower():find(filter, 1, true) then
+                local cell, st = makeCell(weaponScroll, w.Name, w.Image, function()
+                    selectedWeapon = w.Name
+                    applyWeaponHighlight(w.Name)
+                    renderCosmetics(cosmeticSearch.Text)
+                end)
+                weaponStrokes[w.Name] = st
+                if w.Name == selectedWeapon then
+                    st.Color = SELLINE st.Thickness = 2
+                    cell.BackgroundColor3 = SELBG
+                end
+            end
+        end
+    end
+
+    renderCosmetics = function(filter)
+        for _, c in ipairs(cosmeticScroll:GetChildren()) do
+            if c:IsA("TextButton") then c:Destroy() end
+        end
+        filter = (filter or ""):lower()
+        makeCell(cosmeticScroll, "None", "", function()
+            applyCosmetic(selectedWeapon, selectedType, nil)
+            renderWeapons(weaponSearch.Text)
+        end)
+        local list = getCosmetics(selectedWeapon, selectedType)
+        makeCell(cosmeticScroll, "Random", "", function()
+            if #list > 0 then
+                local pick = list[math.random(1, #list)]
+                lastCosmeticName = pick.Name
+                applyCosmetic(selectedWeapon, selectedType, pick.Name)
+                renderWeapons(weaponSearch.Text)
+                renderCosmetics(cosmeticSearch.Text)
+            end
+        end)
+        local appliedName
+        local eq = equipped[selectedWeapon]
+        if eq and eq[selectedType] then appliedName = eq[selectedType].Name end
+        for _, cz in ipairs(list) do
+            if filter == "" or cz.Name:lower():find(filter, 1, true) then
+                local cell, st = makeCell(cosmeticScroll, cz.Name, cz.Image, function()
+                    lastCosmeticName = cz.Name
+                    applyCosmetic(selectedWeapon, selectedType, cz.Name, {})
+                    renderWeapons(weaponSearch.Text)
+                    renderCosmetics(cosmeticSearch.Text)
+                end)
+                if cz.Name == appliedName then
+                    st.Color = SELLINE st.Thickness = 2
+                    cell.BackgroundColor3 = SELBG
+                end
+            end
+        end
+    end
+
+    applyAllBtn.MouseButton1Click:Connect(function()
+        if not lastCosmeticName then return end
+        for _, w in ipairs(weaponList) do
+            local found = false
+            for _, cz in ipairs(getCosmetics(w.Name, selectedType)) do
+                if cz.Name == lastCosmeticName then found = true break end
+            end
+            if found then
+                equipped[w.Name] = equipped[w.Name] or {}
+                local cloned = cloneCosmetic(lastCosmeticName, selectedType, {})
+                if cloned then equipped[w.Name][selectedType] = cloned end
+            end
+        end
+        saveConfig()
+        renderCosmetics(cosmeticSearch.Text)
+    end)
+
+    applyNowBtn.MouseButton1Click:Connect(function() resetCharacter() end)
+    resetBtn.MouseButton1Click:Connect(function()
+        for w in pairs(equipped) do equipped[w] = nil end
+        saveConfig()
+        if selectedWeapon then refreshWeapon(selectedWeapon) end
+        renderCosmetics(cosmeticSearch.Text)
+    end)
+
+    closeBtn.MouseButton1Click:Connect(function()
+        panel.Enabled = false
+    end)
+
+    weaponSearch:GetPropertyChangedSignal("Text"):Connect(function() renderWeapons(weaponSearch.Text) end)
+    cosmeticSearch:GetPropertyChangedSignal("Text"):Connect(function() renderCosmetics(cosmeticSearch.Text) end)
+
+    renderWeapons("")
+    renderCosmetics("")
+end
+
+
+-- ==============================================================================
+-- PART 2: 戰鬥核心面板 + 內嵌「開啟改皮面板」按鈕 (LinoriaLib 完整大合集)
 -- ==============================================================================
 local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 
 local CombatWindow = Library:CreateWindow({
-    Title = 'Roblox 究極戰鬥核心面板 | 全功能與內嵌改皮版',
+    Title = 'Roblox 究極戰鬥核心面板 | 內嵌改皮按鈕版',
     Center = true,
     AutoShow = true,
     TabPadding = 8,
@@ -431,9 +834,25 @@ local HandsGroup = CombatTabs.Visuals:AddRightGroupbox('Viewmodel Settings')
 
 local MoveGroup = CombatTabs.Character:AddLeftGroupbox('Movement & Void Flight (虛空亂飛)')
 
--- 改皮分頁內嵌控制項
-local SkinConfigGroup = CombatTabs.Skins:AddLeftGroupbox('Weapon Skin Settings (武器外觀設定)')
-local SkinActionGroup = CombatTabs.Skins:AddRightGroupbox('Actions & Respawn (套用與重生)')
+-- 改皮分頁按鈕控制項
+local SkinConfigGroup = CombatTabs.Skins:AddLeftGroupbox('Weapon Skin Panel (改皮介面開關)')
+local SkinActionGroup = CombatTabs.Skins:AddRightGroupbox('Character Actions (角色重整)')
+
+SkinConfigGroup:AddButton('開啟完整改皮面板', function()
+    openCosmeticChangerGUI()
+    Library:Notify("已開啟/切換改皮面板！", 2)
+end)
+
+SkinActionGroup:AddButton('Reset Character (重生重整所有造型)', function()
+    resetCharacter()
+    Library:Notify("已重整角色以加載全部造型！", 3)
+end)
+
+SkinActionGroup:AddButton('Reset All Skins (清除所有自定義)', function()
+    for w in pairs(equipped) do equipped[w] = nil end
+    saveConfig()
+    Library:Notify("已清空所有改皮設定！", 3)
+end)
 
 local ChatSystemGroup = CombatTabs.Misc:AddLeftGroupbox('Universal Chat System (群聊與洗版)')
 local NotifyGroup = CombatTabs.Misc:AddRightGroupbox('Notifications & Alerts')
@@ -462,66 +881,6 @@ local WallbangEnabled = false
 local ChatSpamEnabled = false
 local ChatSpamMessage = "Roblox Universal Hub Active!"
 local ChatSpamDelay = 1.5
-
--- 改皮用下拉選單資料準備
-local function getWeaponNamesList()
-    local seen, list = {}, {"Default Weapon"}
-    for _, data in pairs(CosmeticLibrary.Cosmetics) do
-        if type(data) == "table" and data.ItemName and not seen[data.ItemName] and not tostring(data.ItemName):find("MISSING") then
-            seen[data.ItemName] = true
-            table.insert(list, data.ItemName)
-        end
-    end
-    table.sort(list)
-    return list
-end
-
-local weaponNamesArr = getWeaponNamesList()
-local selectedSkinWeapon = weaponNamesArr[1] or "Default"
-local selectedCosmeticType = "Skin"
-local targetCosmeticName = "None"
-
-SkinConfigGroup:AddDropdown('SkinWeaponDrop', {
-    Values = weaponNamesArr,
-    Default = 1,
-    Text = 'Select Weapon (選擇武器)',
-    Callback = function(v) selectedSkinWeapon = v end
-})
-
-SkinConfigGroup:AddDropdown('SkinTypeDrop', {
-    Values = {"Skin", "Wrap", "Charm", "Finisher"},
-    Default = 1,
-    Text = 'Cosmetic Type (外觀類型)',
-    Callback = function(v) selectedCosmeticType = v end
-})
-
-SkinConfigGroup:AddInput('SkinNameInput', {
-    Default = '',
-    Numeric = false,
-    Finished = false,
-    Text = 'Skin / Cosmetic Name (造型名稱)',
-    Tooltip = '輸入精確的造型或裝飾名稱',
-    Callback = function(v) targetCosmeticName = v end
-})
-
-SkinActionGroup:AddButton('Apply Skin (套用此武器造型)', function()
-    if selectedSkinWeapon and targetCosmeticName then
-        applyCosmetic(selectedSkinWeapon, selectedCosmeticType, targetCosmeticName == "None" and nil or targetCosmeticName, {})
-        Library:Notify("成功套用造型到 " .. selectedSkinWeapon, 3)
-    end
-end)
-
-SkinActionGroup:AddButton('Reset Character (重生重整所有造型)', function()
-    resetCharacter()
-    Library:Notify("已重整角色以加載全部造型！", 3)
-end)
-
-SkinActionGroup:AddButton('Reset All Skins (清除所有自定義)', function()
-    for w in pairs(equipped) do equipped[w] = nil end
-    saveConfig()
-    refreshWeapon(selectedSkinWeapon)
-    Library:Notify("已清空所有改皮設定！", 3)
-end)
 
 -- 渲染核心
 local FOVCircle = Drawing.new("Circle")
@@ -737,7 +1096,7 @@ end)
 ChatSystemGroup:AddInput('ChatSpamInput', { Default = 'Roblox Universal Hub Active!', Numeric = false, Finished = false, Text = 'Custom Chat Message', Callback = function(v) ChatSpamMessage = v end })
 ChatSystemGroup:AddSlider('ChatDelaySlider', { Text = 'spam delay: 1.5s', Default = 1.5, Min = 0.5, Max = 5.0, Rounding = 1 }):OnChanged(function(v) ChatSpamDelay = v end)
 ChatSystemGroup:AddButton('Send Once', function() SendUniversalChatMessage(ChatSpamMessage) Library:Notify("訊息已發送", 2) end)
-NotifyGroup:AddButton('Show Welcome Alert', function() Library:Notify("全功能與內嵌改皮分頁版本載入成功！", 4) end)
+NotifyGroup:AddButton('Show Welcome Alert', function() Library:Notify("內嵌改皮按鈕版本載入成功！", 4) end)
 
 SettingsGroup:AddLabel('Menu Binding'):AddKeyPicker('MenuKey', { Default = 'LeftShift', NoUI = true, Text = 'Toggle UI' })
-Library:Notify("究極大合集載入完畢！\n按 LeftShift 開關面板，切換到「skins (改皮系統)」分頁即可自定義外觀。", 6)
+Library:Notify("載入完畢！按 LeftShift 開關主面板，前往「skins (改皮系統)」點擊按鈕即可開啟改皮視窗。", 6)
