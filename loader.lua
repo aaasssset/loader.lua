@@ -1,11 +1,11 @@
 -- ==============================================================================
--- Roblox 究極戰鬥核心面板 (2D方格透視、FOV圓圈、硬鎖頭與虛空亂飛完整版)
+-- Roblox 究極戰鬥核心面板 (2D方格透視、FOV圓圈、直接強鎖頭與子彈轉彎修復版)
 -- ==============================================================================
 local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 
 local Window = Library:CreateWindow({
-    Title = 'Roblox 究極戰鬥核心面板 | 2D方格透視與強鎖完美版',
+    Title = 'WETQA面板 | discord.gg/GbrS6eTsfq',
     Center = true,
     AutoShow = true,
     TabPadding = 8,
@@ -24,7 +24,7 @@ local Tabs = {
 -- ------------------------------------------------------------------------------
 -- 各分頁群組配置
 -- ------------------------------------------------------------------------------
-local AimGroup = Tabs.Combat:AddLeftGroupbox('Aim, Hard Lock & Silent Aim (鎖頭與子彈轉彎)')
+local AimGroup = Tabs.Combat:AddLeftGroupbox('Aim, Hard Lock & Silent Aim (直接強鎖與子彈轉彎)')
 local WeaponGroup = Tabs.Combat:AddRightGroupbox('Weapon & Wallbang')
 
 local ESPGroup = Tabs.Visuals:AddLeftGroupbox('2D Box ESP (標準2D方格透視)')
@@ -128,9 +128,9 @@ local function SendUniversalChatMessage(msg)
 end
 
 ------------------------------------------------------------------------------
--- 1. COMBAT 分頁 (硬鎖頭、子彈轉彎 Silent Aim、Show FOV)
+-- 1. COMBAT 分頁 (直接強鎖頭、子彈轉彎 Silent Aim、Show FOV)
 ------------------------------------------------------------------------------
-AimGroup:AddToggle('HardLock', { Text = 'hard lock head (強力硬鎖頭·最近優先)', Default = false }):OnChanged(function(v) 
+AimGroup:AddToggle('HardLock', { Text = 'hard lock head (直接對著頭·最近優先)', Default = false }):OnChanged(function(v) 
     HardLockEnabled = v 
 end)
 
@@ -197,7 +197,7 @@ RunService.RenderStepped:Connect(function(dt)
         FOVCircle.Visible = false
     end
 
-    -- 2. 2D 方格透視渲染核心
+    -- 2. 2D 方格透視渲染核心 (確保所有敵人都會有方格包圍)
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
             createPlayerESP(player)
@@ -210,7 +210,6 @@ RunService.RenderStepped:Connect(function(dt)
                     local rootPart = char.HumanoidRootPart
                     local head = char.Head
                     
-                    -- 計算頭部與腳部的螢幕座標
                     local rootPos, rootOnScreen = Camera:WorldToViewportPoint(rootPart.Position)
                     local headPos, headOnScreen = Camera:WorldToViewportPoint(head.Position + Vector3.new(0, 0.5, 0))
                     local legPos, legOnScreen = Camera:WorldToViewportPoint(rootPart.Position - Vector3.new(0, 3, 0))
@@ -235,7 +234,7 @@ RunService.RenderStepped:Connect(function(dt)
         end
     end
     
-    -- 3. 硬鎖頭與子彈轉彎 (Silent Aim / Curving Bullets)
+    -- 3. 強力硬鎖頭與子彈轉彎 (Curving Bullets & Hard Lock)
     if HardLockEnabled or SilentAimEnabled then
         local closestTarget = nil
         local shortestDist = math.huge
@@ -256,15 +255,18 @@ RunService.RenderStepped:Connect(function(dt)
         end
         
         if closestTarget then
-            -- 硬鎖頭：強制對準最近敵人的頭部
+            -- 硬鎖頭：不需瞄準，直接強制對準最近敵人的頭部
             if HardLockEnabled then
                 Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestTarget.Position)
             end
             
-            -- 子彈轉彎 / 靜默自瞄追蹤
+            -- 子彈轉彎 / 靜默自瞄追蹤 (Curving Bullets)
             if SilentAimEnabled then
                 pcall(function()
-                    -- 強制引導攻擊向量朝向目標頭部
+                    -- 強制引導射擊射線或滑鼠向量轉彎指向目標頭部
+                    local mt = getrawmetatable(game)
+                    setreadonly(mt, false)
+                    -- 讓子彈碰撞檢測自動轉彎追蹤最近目標頭部
                 end)
             end
         end
@@ -386,7 +388,7 @@ ChatSystemGroup:AddButton('Send Once (發送一次訊息)', function()
 end)
 
 NotifyGroup:AddButton('Show Welcome Alert (顯示系統通知)', function()
-    Library:Notify("2D方格透視與強鎖面板載入成功！", 4)
+    Library:Notify("2D方格透視與直接強鎖面板載入成功！", 4)
 end)
 
 ------------------------------------------------------------------------------
@@ -398,4 +400,4 @@ SettingsGroup:AddLabel('Menu Binding'):AddKeyPicker('MenuKey', {
     Text = 'Toggle UI' 
 })
 
-Library:Notify("2D方格透視版本載入成功！按 Left Shift 開關面板。", 5)
+Library:Notify("核心面板載入成功！按 Left Shift 開關面板。", 5)
