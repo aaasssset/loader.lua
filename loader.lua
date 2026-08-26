@@ -1,72 +1,69 @@
 -- ==============================================================================
--- Roblox 究極戰鬥核心面板 (硬鎖頭、最近優先、強制透視、虛空亂飛修復版)
+-- Roblox 全遊戲通用究極核心面板 (硬鎖頭、透視、虛空亂飛、群聊系統全修復版)
 -- ==============================================================================
 local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 
 local Window = Library:CreateWindow({
-    Title = 'Roblox 究極戰鬥核心面板 | 強鎖與透視修復版',
+    Title = 'Roblox 全遊戲通用核心面板 | 完美修復版',
     Center = true,
     AutoShow = true,
     TabPadding = 8,
     MenuFadeTime = 0.2
 })
 
--- 建立 4 大核心分頁
+-- 建立 5 大核心分頁
 local Tabs = {
     Combat = Window:AddTab('combat'),
     Visuals = Window:AddTab('visuals'),
     Character = Window:AddTab('character'),
+    Misc = Window:AddTab('misc'),
     Settings = Window:AddTab('settings')
 }
 
--- 群組配置
-local AimGroup = Tabs.Combat:AddLeftGroupbox('Aim & Hard Lock (硬鎖頭與自瞄)')
-local WeaponGroup = Tabs.Combat:AddRightGroupbox('Weapon & Firerate (射速與穿牆)')
+-- ------------------------------------------------------------------------------
+-- 各分頁群組配置
+-- ------------------------------------------------------------------------------
+local AimGroup = Tabs.Combat:AddLeftGroupbox('Universal Aimbot & Hard Lock')
+local WeaponGroup = Tabs.Combat:AddRightGroupbox('Weapon & Wallbang')
 
-local ESPGroup = Tabs.Visuals:AddLeftGroupbox('ESP Options (強效透視)')
-local FOVVisualGroup = Tabs.Visuals:AddRightGroupbox('FOV Visuals & Rotation (範圍與顏色旋轉)')
-local HandsGroup = Tabs.Visuals:AddRightGroupbox('Viewmodel (無手模式設定)')
+local ESPGroup = Tabs.Visuals:AddLeftGroupbox('Universal ESP (萬能透視)')
+local HandsGroup = Tabs.Visuals:AddRightGroupbox('Viewmodel Settings')
 
-local MoveGroup = Tabs.Character:AddLeftGroupbox('Movement & Void Flight (虛空亂飛與穿牆)')
+local MoveGroup = Tabs.Character:AddLeftGroupbox('Movement & Void Flight (虛空亂飛)')
+
+local ChatSystemGroup = Tabs.Misc:AddLeftGroupbox('Universal Chat System (群聊與洗版)')
+local NotifyGroup = Tabs.Misc:AddRightGroupbox('Notifications & Alerts')
+
 local SettingsGroup = Tabs.Settings:AddLeftGroupbox('UI Settings & Keybinds')
 
 -- 核心系統服務
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local TextChatService = game:GetService("TextChatService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
 -- 狀態變數
-local SilentAimEnabled = false
 local HardLockEnabled = false
-local ShowFOV = false
-local FOVRadius = 200
+local WallbangEnabled = false
 local BoxESP = false
 local FillESP = false
 local OutlineColor = Color3.fromRGB(255, 0, 0)
 local FillColor = Color3.fromRGB(0, 255, 255)
-
-local MovingRotation = false
-local RotationSpeed = 1
-local CurrentRotation = 0
 
 local NoclipEnabled = false
 local VoidFlyEnabled = false
 local VoidFlySpeed = 75
 local AntiVoidEnabled = false
 local RemoveHandsEnabled = false
-local WallbangEnabled = false
-local FirerateMultiplier = 1.0
 
--- 建立 FOV 範圍圓圈
-local FOVCircle = Drawing.new("Circle")
-FOVCircle.Visible = false
-FOVCircle.Thickness = 1.5
-FOVCircle.NumSides = 64
-FOVCircle.Color = Color3.fromRGB(255, 255, 255)
-FOVCircle.Filled = false
+-- 群聊系統變數
+local ChatSpamEnabled = false
+local ChatSpamMessage = "Roblox Universal Hub Active!"
+local ChatSpamDelay = 1.5
 
 -- SHIFT 開關面板
 local UIHidden = false
@@ -77,42 +74,42 @@ UserInputService.InputBegan:Connect(function(input)
     end
 end)
 
-------------------------------------------------------------------------------
--- 1. COMBAT 分頁 (硬鎖頭：最近距離優先、強制釘在頭部)
-------------------------------------------------------------------------------
-AimGroup:AddToggle('SilentAim', { Text = 'silent aim (靜默自瞄)', Default = false }):OnChanged(function(v) 
-    SilentAimEnabled = v 
-end)
+-- 通用聊天發送函數
+local function SendUniversalChatMessage(msg)
+    pcall(function()
+        if TextChatService.ChatVersion == Enum.ChatVersion.TextChatService then
+            local channel = TextChatService.TextChannels:FindFirstChild("RBXGeneral")
+            if channel then
+                channel:SendAsync(msg)
+            end
+        else
+            local oldChat = ReplicatedStorage:FindFirstChild("DefaultChatSystemChatEvents")
+            if oldChat and oldChat:FindFirstChild("SayMessageRequest") then
+                oldChat.SayMessageRequest:FireServer(msg, "All")
+            end
+        end
+    end)
+end
 
-AimGroup:AddToggle('HardLock', { Text = 'hard lock head (強力硬鎖頭·最近優先)', Default = false }):OnChanged(function(v) 
+------------------------------------------------------------------------------
+-- 1. COMBAT 分頁 (通用硬鎖頭)
+------------------------------------------------------------------------------
+AimGroup:AddToggle('HardLock', { Text = 'universal hard lock (萬能強制鎖頭)', Default = false }):OnChanged(function(v) 
     HardLockEnabled = v 
 end)
 
-AimGroup:AddToggle('ShowFOV', { Text = 'show fov (顯示自瞄範圍)', Default = false }):OnChanged(function(v) 
-    ShowFOV = v 
-end)
-
-AimGroup:AddSlider('FOVRadius', { Text = 'radius: 200px', Default = 200, Min = 50, Max = 800, Rounding = 0 }):OnChanged(function(v)
-    FOVRadius = v
-    FOVCircle.Radius = v
-end)
-
-WeaponGroup:AddToggle('Wallbang', { Text = 'bullet wallbang (子彈穿牆)', Default = false }):OnChanged(function(v)
+WeaponGroup:AddToggle('Wallbang', { Text = 'bullet wallbang (通用子彈穿牆)', Default = false }):OnChanged(function(v)
     WallbangEnabled = v
 end)
 
-WeaponGroup:AddSlider('Firerate', { Text = 'firerate multiplier: 1x', Default = 1, Min = 1, Max = 5, Rounding = 1 }):OnChanged(function(v)
-    FirerateMultiplier = v
-end)
-
 ------------------------------------------------------------------------------
--- 2. VISUALS 分頁 (透視強制修復、高亮色彩)
+-- 2. VISUALS 分頁 (通用強效透視)
 ------------------------------------------------------------------------------
-ESPGroup:AddToggle('BoxESP', { Text = 'box / outline (外框透視)', Default = false }):OnChanged(function(v) 
+ESPGroup:AddToggle('BoxESP', { Text = 'box / outline esp (外框透視)', Default = false }):OnChanged(function(v) 
     BoxESP = v 
 end)
 
-ESPGroup:AddToggle('FillESP', { Text = 'fill (填滿高亮透視)', Default = false }):OnChanged(function(v) 
+ESPGroup:AddToggle('FillESP', { Text = 'fill esp (填滿高亮透視)', Default = false }):OnChanged(function(v) 
     FillESP = v 
 end)
 
@@ -132,14 +129,6 @@ ESPGroup:AddLabel('Fill Color'):AddColorPicker('FillColorPicker', {
     end 
 })
 
-FOVVisualGroup:AddToggle('MovingRotation', { Text = 'moving rotation (範圍顏色旋轉)', Default = false }):OnChanged(function(v) 
-    MovingRotation = v 
-end)
-
-FOVVisualGroup:AddSlider('RotationSpeed', { Text = 'speed: 1 rps', Default = 1, Min = 0.1, Max = 5, Rounding = 1 }):OnChanged(function(v) 
-    RotationSpeed = v 
-end)
-
 HandsGroup:AddToggle('RemoveHands', { Text = 'remove hands (無手模式)', Default = false }):OnChanged(function(state)
     RemoveHandsEnabled = state
     if Camera:FindFirstChild("ViewModel") then
@@ -147,35 +136,21 @@ HandsGroup:AddToggle('RemoveHands', { Text = 'remove hands (無手模式)', Defa
     end
 end)
 
--- 即時渲染核心：強制最近距離頭部硬鎖 + 透視高亮
-RunService.RenderStepped:Connect(function(dt)
-    -- Show FOV 顯示
-    if ShowFOV then
-        FOVCircle.Visible = true
-        FOVCircle.Position = UserInputService:GetMouseLocation()
-        if MovingRotation then
-            CurrentRotation = CurrentRotation + (RotationSpeed * dt * 10)
-            FOVCircle.Color = Color3.fromHSV((CurrentRotation % 360) / 360, 1, 1)
-        else
-            FOVCircle.Color = Color3.fromRGB(255, 255, 255)
-        end
-    else
-        FOVCircle.Visible = false
-    end
-
-    -- ★ 透視修復：強效生成高亮物件，確保能看穿牆壁與障礙物
+-- 萬能即時渲染核心 (透視與硬鎖頭)
+RunService.RenderStepped:Connect(function()
+    -- 通用透視高亮
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character then
             local char = player.Character
-            local highlight = char:FindFirstChild("AbsoluteESP_Highlight")
+            local highlight = char:FindFirstChild("UniversalESP_Highlight")
             
             if BoxESP or FillESP then
                 if not highlight then
                     highlight = Instance.new("Highlight")
-                    highlight.Name = "AbsoluteESP_Highlight"
+                    highlight.Name = "UniversalESP_Highlight"
                     highlight.Adornee = char
                     highlight.Parent = char
-                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop -- 關鍵：強制顯示在最上層（穿牆可見）
+                    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                 end
                 highlight.FillColor = FillColor
                 highlight.OutlineColor = OutlineColor
@@ -183,17 +158,15 @@ RunService.RenderStepped:Connect(function(dt)
                 highlight.OutlineTransparency = BoxESP and 0 or 1
                 highlight.Enabled = true
             else
-                if highlight then 
-                    highlight.Enabled = false 
-                end
+                if highlight then highlight.Enabled = false end
             end
         end
     end
     
-    -- ★ 硬鎖頭修復：不需右鍵，自動抓取畫面中「距離自己最近」的敵方頭部直接鎖死
+    -- 通用硬鎖頭 (最近距離頭部鎖定)
     if HardLockEnabled then
         local closestTarget = nil
-        local shortestDist = math.huge -- 不受 FOV 限制或以最近距離優先
+        local shortestDist = math.huge
         local localPos = Camera.CFrame.Position
         
         for _, v in pairs(Players:GetPlayers()) do
@@ -202,8 +175,6 @@ RunService.RenderStepped:Connect(function(dt)
                 if humanoid and humanoid.Health > 0 then
                     local headPart = v.Character.Head
                     local dist = (localPos - headPart.Position).Magnitude
-                    
-                    -- 尋找距離最近的活著目標
                     if dist < shortestDist then
                         shortestDist = dist
                         closestTarget = headPart
@@ -219,7 +190,7 @@ RunService.RenderStepped:Connect(function(dt)
 end)
 
 ------------------------------------------------------------------------------
--- 3. CHARACTER 分頁邏輯 (虛空亂飛、穿牆、防虛空)
+-- 3. CHARACTER 分頁 (虛空亂飛與穿牆)
 ------------------------------------------------------------------------------
 MoveGroup:AddToggle('Noclip', { Text = 'noclip (全身穿牆)', Default = false }):OnChanged(function(state) 
     NoclipEnabled = state 
@@ -233,13 +204,13 @@ MoveGroup:AddToggle('VoidFly', { Text = 'void fly (虛空亂飛模式)', Default
     if VoidFlyEnabled then
         local rootPart = char.HumanoidRootPart
         local BV = Instance.new("BodyVelocity")
-        BV.Name = "VoidFlyVelocity"
+        BV.Name = "UniversalFlyVelocity"
         BV.Velocity = Vector3.new(0, 0, 0)
         BV.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
         BV.Parent = rootPart
         
         local BG = Instance.new("BodyGyro")
-        BG.Name = "VoidFlyGyro"
+        BG.Name = "UniversalFlyGyro"
         BG.CFrame = rootPart.CFrame
         BG.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
         BG.Parent = rootPart
@@ -262,12 +233,8 @@ MoveGroup:AddToggle('VoidFly', { Text = 'void fly (虛空亂飛模式)', Default
             end
         end)
     else
-        if char.HumanoidRootPart:FindFirstChild("VoidFlyVelocity") then 
-            char.HumanoidRootPart.VoidFlyVelocity:Destroy() 
-        end
-        if char.HumanoidRootPart:FindFirstChild("VoidFlyGyro") then 
-            char.HumanoidRootPart.VoidFlyGyro:Destroy() 
-        end
+        if char.HumanoidRootPart:FindFirstChild("UniversalFlyVelocity") then char.HumanoidRootPart.UniversalFlyVelocity:Destroy() end
+        if char.HumanoidRootPart:FindFirstChild("UniversalFlyGyro") then char.HumanoidRootPart.UniversalFlyGyro:Destroy() end
     end
 end)
 
@@ -282,9 +249,7 @@ end)
 RunService.Heartbeat:Connect(function()
     if NoclipEnabled and LocalPlayer.Character then
         for _, p in pairs(LocalPlayer.Character:GetDescendants()) do
-            if p:IsA("BasePart") then 
-                p.CanCollide = false 
-            end
+            if p:IsA("BasePart") then p.CanCollide = false end
         end
     end
     
@@ -298,7 +263,52 @@ RunService.Heartbeat:Connect(function()
 end)
 
 ------------------------------------------------------------------------------
--- 4. SETTINGS 分頁邏輯
+-- 4. MISC 分頁 (萬能群聊系統與洗版)
+------------------------------------------------------------------------------
+ChatSystemGroup:AddToggle('ChatSpamToggle', { Text = 'enabled chat spam (群聊廣播洗版)', Default = false }):OnChanged(function(state)
+    ChatSpamEnabled = state
+    if ChatSpamEnabled then
+        task.spawn(function()
+            while ChatSpamEnabled do
+                SendUniversalChatMessage(ChatSpamMessage)
+                task.wait(ChatSpamDelay)
+            end
+        end)
+    end
+end)
+
+ChatSystemGroup:AddInput('ChatSpamInput', {
+    Default = 'Roblox Universal Hub Active!',
+    Numeric = false,
+    Finished = false,
+    Text = 'Custom Chat Message (自定義群聊訊息)',
+    Tooltip = '輸入你想在聊天室廣播的文字',
+    Callback = function(v)
+        ChatSpamMessage = v
+    end
+})
+
+ChatSystemGroup:AddSlider('ChatDelaySlider', {
+    Text = 'spam delay: 1.5s',
+    Default = 1.5,
+    Min = 0.5,
+    Max = 5.0,
+    Rounding = 1
+}):OnChanged(function(v)
+    ChatSpamDelay = v
+end)
+
+ChatSystemGroup:AddButton('Send Once (發送一次訊息)', function()
+    SendUniversalChatMessage(ChatSpamMessage)
+    Library:Notify("已成功向聊天室發送訊息！", 2)
+end)
+
+NotifyGroup:AddButton('Show Welcome Alert (顯示系統通知)', function()
+    Library:Notify("全遊戲通用核心面板運作正常！", 4)
+end)
+
+------------------------------------------------------------------------------
+-- 5. SETTINGS 分頁
 ------------------------------------------------------------------------------
 SettingsGroup:AddLabel('Menu Binding'):AddKeyPicker('MenuKey', { 
     Default = 'LeftShift', 
@@ -306,4 +316,4 @@ SettingsGroup:AddLabel('Menu Binding'):AddKeyPicker('MenuKey', {
     Text = 'Toggle UI' 
 })
 
-Library:Notify("硬鎖頭與強制透視修復版載入成功！按 Left Shift 開關面板。", 5)
+Library:Notify("全遊戲通用核心面板載入成功！按 Left Shift 開關面板。", 5)
