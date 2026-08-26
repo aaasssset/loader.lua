@@ -1,8 +1,9 @@
+
 local repo = 'https://raw.githubusercontent.com/violin-suzutsuki/LinoriaLib/main/'
 local Library = loadstring(game:HttpGet(repo .. 'Library.lua'))()
 
 local Window = Library:CreateWindow({
-    Title = 'WETQA面板 | discord.gg/GbrS6eTsfq ',
+    Title = 'WETQA面板 | discord.gg/GbrS6eTsfq',
     Center = true,
     AutoShow = true,
     TabPadding = 8,
@@ -41,7 +42,7 @@ local Camera = workspace.CurrentCamera
 local SilentAimEnabled = false
 local AimbotEnabled = false
 local ShowFOV = false
-local FOVRadius = 100
+local FOVRadius = 150
 local BoxESP = false
 local FillESP = false
 local OutlineColor = Color3.fromRGB(255, 0, 0)
@@ -83,7 +84,7 @@ AimGroup:AddToggle('SilentAim', { Text = 'silent aim (靜默自瞄)', Default = 
     SilentAimEnabled = v 
 end)
 
-AimGroup:AddToggle('Aimbot', { Text = 'aimbot / lock head (鎖頭)', Default = false }):OnChanged(function(v) 
+AimGroup:AddToggle('Aimbot', { Text = 'aimbot / lock head (強力鎖頭)', Default = false }):OnChanged(function(v) 
     AimbotEnabled = v 
 end)
 
@@ -91,7 +92,7 @@ AimGroup:AddToggle('ShowFOV', { Text = 'show fov (顯示自瞄範圍)', Default 
     ShowFOV = v 
 end)
 
-AimGroup:AddSlider('FOVRadius', { Text = 'radius: 100px', Default = 100, Min = 10, Max = 400, Rounding = 0 }):OnChanged(function(v)
+AimGroup:AddSlider('FOVRadius', { Text = 'radius: 150px', Default = 150, Min = 10, Max = 600, Rounding = 0 }):OnChanged(function(v)
     FOVRadius = v
     FOVCircle.Radius = v
 end)
@@ -105,13 +106,13 @@ WeaponGroup:AddSlider('Firerate', { Text = 'firerate multiplier: 1x', Default = 
 end)
 
 ------------------------------------------------------------------------------
--- 2. VISUALS 分頁邏輯 (方框透視、填滿高亮、自訂顏色、動態旋轉、無手)
+-- 2. VISUALS 分頁邏輯 (強力修復透視高亮、自訂顏色、動態旋轉、無手)
 ------------------------------------------------------------------------------
 ESPGroup:AddToggle('BoxESP', { Text = 'box / outline (外框透視)', Default = false }):OnChanged(function(v) 
     BoxESP = v 
 end)
 
-ESPGroup:AddToggle('FillESP', { Text = 'fill (填滿高亮)', Default = false }):OnChanged(function(v) 
+ESPGroup:AddToggle('FillESP', { Text = 'fill (填滿高亮透視)', Default = false }):OnChanged(function(v) 
     FillESP = v 
 end)
 
@@ -146,7 +147,7 @@ HandsGroup:AddToggle('RemoveHands', { Text = 'remove hands (無手模式)', Defa
     end
 end)
 
--- 即時渲染迴圈 (處理 FOV 圓圈、動態色彩、ESP 高亮與 Aimbot 鎖頭)
+-- 即時渲染迴圈：完美修復鎖頭與透視的高效能核心
 RunService.RenderStepped:Connect(function(dt)
     -- Show FOV 渲染與旋轉動畫計算
     if ShowFOV then
@@ -162,21 +163,22 @@ RunService.RenderStepped:Connect(function(dt)
         FOVCircle.Visible = false
     end
 
-    -- ESP 實時高亮與自訂顏色套用
+    -- ★ 透視修復強化：強制為所有玩家建立與更新 Highlight
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer and player.Character then
             local char = player.Character
-            local highlight = char:FindFirstChild("CustomHighlight")
+            local highlight = char:FindFirstChild("EnhancedESP_Highlight")
             
-            if (BoxESP or FillESP) then
+            if BoxESP or FillESP then
                 if not highlight then
                     highlight = Instance.new("Highlight")
-                    highlight.Name = "CustomHighlight"
+                    highlight.Name = "EnhancedESP_Highlight"
+                    highlight.Adornee = char
                     highlight.Parent = char
                 end
                 highlight.FillColor = FillColor
                 highlight.OutlineColor = OutlineColor
-                highlight.FillTransparency = FillESP and 0.5 or 1
+                highlight.FillTransparency = FillESP and 0.4 or 1
                 highlight.OutlineTransparency = BoxESP and 0 or 1
                 highlight.Enabled = true
             else
@@ -187,24 +189,28 @@ RunService.RenderStepped:Connect(function(dt)
         end
     end
     
-    -- Aimbot 鎖頭核心運算
+    -- ★ 鎖頭修復強化：完美捕捉畫面內的敵人頭部並平滑/直接鎖定
     if AimbotEnabled then
         local closestTarget = nil
         local shortestDist = FOVRadius
         local mousePos = UserInputService:GetMouseLocation()
         
         for _, v in pairs(Players:GetPlayers()) do
-            if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") and v.Character.Humanoid.Health > 0 then
-                local headPos, onScreen = Camera:WorldToScreenPoint(v.Character.Head.Position)
-                if onScreen then
-                    local dist = (mousePos - Vector2.new(headPos.X, headPos.Y)).Magnitude
-                    if dist < shortestDist then
-                        shortestDist = dist
-                        closestTarget = v.Character.Head
+            if v ~= LocalPlayer and v.Character and v.Character:FindFirstChild("Head") then
+                local humanoid = v.Character:FindFirstChildOfClass("Humanoid")
+                if humanoid and humanoid.Health > 0 then
+                    local headPos, onScreen = Camera:WorldToScreenPoint(v.Character.Head.Position)
+                    if onScreen then
+                        local dist = (mousePos - Vector2.new(headPos.X, headPos.Y)).Magnitude
+                        if dist < shortestDist then
+                            shortestDist = dist
+                            closestTarget = v.Character.Head
+                        end
                     end
                 end
             end
         end
+        
         if closestTarget then
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, closestTarget.Position)
         end
@@ -218,7 +224,7 @@ MoveGroup:AddToggle('Noclip', { Text = 'noclip (全身穿牆)', Default = false 
     NoclipEnabled = state 
 end)
 
--- 虛空亂飛模式 (Void Flight - 無重力、自由方向高速穿梭)
+-- 虛空亂飛模式 (Void Flight)
 MoveGroup:AddToggle('VoidFly', { Text = 'void fly (虛空亂飛模式)', Default = false }):OnChanged(function(state)
     VoidFlyEnabled = state
     local char = LocalPlayer.Character
@@ -243,7 +249,6 @@ MoveGroup:AddToggle('VoidFly', { Text = 'void fly (虛空亂飛模式)', Default
                 local camCFrame = Camera.CFrame
                 local moveDir = Vector3.new(0, 0, 0)
                 
-                -- 全方向虛空亂飛控制 (WASD + 升降控制)
                 if UserInputService:IsKeyDown(Enum.KeyCode.W) then
                     moveDir = moveDir + camCFrame.LookVector
                 end
@@ -286,7 +291,6 @@ MoveGroup:AddToggle('AntiVoid', { Text = 'anti void (防虛空掉落保護)', De
     AntiVoidEnabled = v 
 end)
 
--- 心跳循環：執行 Noclip 穿牆與 Anti-Void 防虛空保護
 RunService.Heartbeat:Connect(function()
     if NoclipEnabled and LocalPlayer.Character then
         for _, p in pairs(LocalPlayer.Character:GetDescendants()) do
@@ -296,7 +300,6 @@ RunService.Heartbeat:Connect(function()
         end
     end
     
-    -- 自動偵測掉落虛空並瞬間拉回安全高度
     if AntiVoidEnabled and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local root = LocalPlayer.Character.HumanoidRootPart
         if root.Position.Y < -60 then
@@ -307,7 +310,7 @@ RunService.Heartbeat:Connect(function()
 end)
 
 ------------------------------------------------------------------------------
--- 4. SETTINGS 分頁邏輯 (介面快捷鍵設定)
+-- 4. SETTINGS 分頁邏輯
 ------------------------------------------------------------------------------
 SettingsGroup:AddLabel('Menu Binding'):AddKeyPicker('MenuKey', { 
     Default = 'LeftShift', 
@@ -315,4 +318,4 @@ SettingsGroup:AddLabel('Menu Binding'):AddKeyPicker('MenuKey', {
     Text = 'Toggle UI' 
 })
 
-Library:Notify("虛空亂飛戰鬥面板載入成功！按 Left Shift 開關面板。", 5)
+Library:Notify("鎖頭與透視強化修復版載入成功！按 Left Shift 開關面板。", 5)
